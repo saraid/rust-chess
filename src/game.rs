@@ -84,11 +84,11 @@ impl CastlingAvailability {
 
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub enum Move {
-    Base(Coord),
-    Capture(Coord),
-    DoubleAdvance(Coord, Coord),
-    EnPassant(Coord),
-    Promotion(Coord, Piece),
+    Basic(/* origin */Coord, /* destination */ Coord),
+    Capture(/* origin */Coord, /* destination */ Coord),
+    DoubleAdvance(/* destination */ Coord, /* en passant */ Coord),
+    EnPassant(/* origin */ Coord),
+    Promotion(/* origin */ Coord, /* destination */ Coord, Piece),
     Castle,
 }
 
@@ -136,7 +136,7 @@ impl Game {
                             panic!("this pawn should have been promoted");
                         };
                         if Board::piece_at(&game.board, &candidate).is_none() {
-                            moves.insert(Move::Base(candidate));
+                            moves.insert(Move::Basic(coord.clone(), candidate));
                         }
 
                         // double advance
@@ -167,8 +167,8 @@ impl Game {
                         {
                             Some(candidate) => {
                                 match &game.en_passant_target {
-                                    Some(target) => {
-                                        moves.insert(Move::Capture(target.clone()));
+                                    Some(_target) => {
+                                        moves.insert(Move::EnPassant(coord.clone()));
                                     }
                                     None => {}
                                 }
@@ -176,7 +176,7 @@ impl Game {
                                     .filter(|p| Piece::side(p) != &side)
                                 {
                                     Some(_) => {
-                                        moves.insert(Move::Capture(candidate));
+                                        moves.insert(Move::Capture(coord.clone(), candidate));
                                     }
                                     None => {}
                                 }
@@ -188,8 +188,8 @@ impl Game {
                         {
                             Some(candidate) => {
                                 match &game.en_passant_target {
-                                    Some(target) => {
-                                        moves.insert(Move::Capture(target.clone()));
+                                    Some(_target) => {
+                                        moves.insert(Move::EnPassant(coord.clone()));
                                     }
                                     None => {}
                                 }
@@ -197,7 +197,7 @@ impl Game {
                                     .filter(|p| Piece::side(p) != &side)
                                 {
                                     Some(_) => {
-                                        moves.insert(Move::Capture(candidate));
+                                        moves.insert(Move::Capture(coord.clone(), candidate));
                                     }
                                     None => {}
                                 }
@@ -205,11 +205,22 @@ impl Game {
                             None => {}
                         }
                     }
-                    _ => panic!(),
+                    _ => todo!(),
                 }
                 moves
             }
             None => HashSet::new(),
+        }
+    }
+
+    pub fn execute(game: &mut Self, move_to_take: Move) {
+        match move_to_take {
+            Move::Basic(origin, destination) => {
+                let piece = Board::piece_at(&game.board, &origin).unwrap();
+                Board::remove(&mut game.board, &origin);
+                Board::place(&mut game.board, &destination, piece);
+            },
+            _ => todo!()
         }
     }
 }
@@ -230,7 +241,7 @@ mod tests {
         let set = Game::move_set(&game, &Coord::try_from("e2").unwrap());
         println!("{:?}", set);
         assert_eq!(2, set.len());
-        assert!(set.contains(&Move::Base(Coord::try_from("e3").unwrap())));
+        assert!(set.contains(&Move::Basic(Coord::try_from("e2").unwrap(), Coord::try_from("e3").unwrap())));
         assert!(set.contains(&Move::DoubleAdvance(
             Coord::try_from("e4").unwrap(),
             Coord::try_from("e3").unwrap(),
@@ -243,7 +254,18 @@ mod tests {
         let set = Game::move_set(&game, &Coord::try_from("e5").unwrap());
         println!("{:?}", set);
         assert_eq!(2, set.len());
-        assert!(set.contains(&Move::Base(Coord::try_from("e6").unwrap())));
+        assert!(set.contains(&Move::Basic(Coord::try_from("e5").unwrap(), Coord::try_from("e6").unwrap())));
         assert!(set.contains(&Move::Capture(Coord::try_from("d6").unwrap())));
+    }
+
+    #[test]
+    fn pawn_basic_move() {
+        let mut game = Game::from_fen("8/8/8/8/4P3/8/8/8 w - - 0 1");
+        let piece = Board::piece_at(&game.board, &Coord::try_from("e4").unwrap()).unwrap();
+        let set = Game::move_set(&game, &Coord::try_from("e4").unwrap());
+        assert_eq!(1, set.len());
+        Game::execute(&mut game, Move::Basic(Coord::try_from("e4").unwrap(), Coord::try_from("e5").unwrap()));
+        assert_eq!(Board::piece_at(&game.board, &Coord::try_from("e4").unwrap()), None);
+        assert_eq!(Board::piece_at(&game.board, &Coord::try_from("e5").unwrap()), Some(piece));
     }
 }

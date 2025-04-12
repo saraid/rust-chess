@@ -34,7 +34,7 @@ impl Board {
     pub fn piece_at(board: &Self, coord: &Coord) -> Option<Piece> {
         match board.squares.get(&coord) {
             Some(piece_opt) => *piece_opt,
-            _ => panic!(),
+            _ => panic!("attempted to get piece from non-existent square"),
         }
     }
 
