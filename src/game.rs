@@ -68,6 +68,17 @@ impl CastlingAvailability {
         ca
     }
 
+    pub fn to_fen(&self) -> String {
+        let mut fen = String::new();
+        if self.kingside_white { fen.push_str("K"); }
+        if self.queenside_white { fen.push_str("Q"); }
+        if self.kingside_black { fen.push_str("k"); }
+        if self.queenside_black { fen.push_str("q"); }
+        if fen.is_empty()
+        { return String::from("-"); }
+        fen
+    }
+
     pub fn available(&self, castle: &Castle) -> bool {
         match castle {
             Castle::Kingside(side) => match side {
@@ -84,8 +95,8 @@ impl CastlingAvailability {
 
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub enum Move {
-    Basic(/* origin */Coord, /* destination */ Coord),
-    Capture(/* origin */Coord, /* destination */ Coord),
+    Basic(/* origin */ Coord, /* destination */ Coord),
+    Capture(/* origin */ Coord, /* destination */ Coord),
     DoubleAdvance(/* destination */ Coord, /* en passant */ Coord),
     EnPassant(/* origin */ Coord),
     Promotion(/* origin */ Coord, /* destination */ Coord, Piece),
@@ -123,6 +134,27 @@ impl Game {
             half_move_clock: (&caps["half_move_clock"]).parse::<u32>().unwrap(),
             full_move_clock: (&caps["full_move_clock"]).parse::<u32>().unwrap(),
         }
+    }
+
+    pub fn to_fen(game: &Self) -> String {
+        let mut fen = Into::<String>::into(game.board.clone());
+        fen.push_str(" ");
+        match game.active_color {
+            Side::White => fen.push_str("w"),
+            Side::Black => fen.push_str("b"),
+        }
+        fen.push_str(" ");
+        fen.push_str(&CastlingAvailability::to_fen(&game.castling_availability));
+        fen.push_str(" ");
+        match &game.en_passant_target {
+            Some(target) => fen.push_str(&target.to_string()),
+            None => fen.push_str("-"),
+        }
+        fen.push_str(" ");
+        fen.push_str(&game.half_move_clock.to_string());
+        fen.push_str(" ");
+        fen.push_str(&game.full_move_clock.to_string());
+        fen
     }
 
     pub fn move_set(game: &Self, coord: &Coord) -> HashSet<Move> {
@@ -219,8 +251,8 @@ impl Game {
                 let piece = Board::piece_at(&game.board, &origin).unwrap();
                 Board::remove(&mut game.board, &origin);
                 Board::place(&mut game.board, &destination, piece);
-            },
-            _ => todo!()
+            }
+            _ => todo!(),
         }
     }
 }
@@ -241,7 +273,10 @@ mod tests {
         let set = Game::move_set(&game, &Coord::try_from("e2").unwrap());
         println!("{:?}", set);
         assert_eq!(2, set.len());
-        assert!(set.contains(&Move::Basic(Coord::try_from("e2").unwrap(), Coord::try_from("e3").unwrap())));
+        assert!(set.contains(&Move::Basic(
+            Coord::try_from("e2").unwrap(),
+            Coord::try_from("e3").unwrap()
+        )));
         assert!(set.contains(&Move::DoubleAdvance(
             Coord::try_from("e4").unwrap(),
             Coord::try_from("e3").unwrap(),
@@ -254,7 +289,10 @@ mod tests {
         let set = Game::move_set(&game, &Coord::try_from("e5").unwrap());
         println!("{:?}", set);
         assert_eq!(2, set.len());
-        assert!(set.contains(&Move::Basic(Coord::try_from("e5").unwrap(), Coord::try_from("e6").unwrap())));
+        assert!(set.contains(&Move::Basic(
+            Coord::try_from("e5").unwrap(),
+            Coord::try_from("e6").unwrap()
+        )));
         assert!(set.contains(&Move::Capture(Coord::try_from("d6").unwrap())));
     }
 
@@ -264,8 +302,20 @@ mod tests {
         let piece = Board::piece_at(&game.board, &Coord::try_from("e4").unwrap()).unwrap();
         let set = Game::move_set(&game, &Coord::try_from("e4").unwrap());
         assert_eq!(1, set.len());
-        Game::execute(&mut game, Move::Basic(Coord::try_from("e4").unwrap(), Coord::try_from("e5").unwrap()));
-        assert_eq!(Board::piece_at(&game.board, &Coord::try_from("e4").unwrap()), None);
-        assert_eq!(Board::piece_at(&game.board, &Coord::try_from("e5").unwrap()), Some(piece));
+        Game::execute(
+            &mut game,
+            Move::Basic(
+                Coord::try_from("e4").unwrap(),
+                Coord::try_from("e5").unwrap(),
+            ),
+        );
+        assert_eq!(
+            Board::piece_at(&game.board, &Coord::try_from("e4").unwrap()),
+            None
+        );
+        assert_eq!(
+            Board::piece_at(&game.board, &Coord::try_from("e5").unwrap()),
+            Some(piece)
+        );
     }
 }

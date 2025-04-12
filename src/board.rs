@@ -2,6 +2,7 @@ use crate::coord::{FILES, RANKS};
 use crate::{coord::Coord, piece::Piece};
 use std::collections::HashMap;
 
+#[derive(Clone)]
 pub struct Board {
     squares: HashMap<Coord, Option<Piece>>,
 }
