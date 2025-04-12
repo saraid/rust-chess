@@ -30,11 +30,27 @@ impl Board {
         Board { squares }
     }
 
-    pub fn place(board: &mut Self, coord: Coord, piece: Piece) {
+    pub fn empty() -> Board { Board::new() }
+
+    pub fn standard() -> Board {
+        let Ok(board) = Board::try_from(STANDARD_FEN) else {
+            panic!("impossible fen");
+        };
+        board
+    }
+
+    pub fn place(board: &mut Self, coord: &Coord, piece: Piece) {
         board
             .squares
-            .entry(coord)
+            .entry(coord.clone())
             .and_modify(|s| (*s).piece = Some(piece));
+    }
+
+    pub fn remove(board: &mut Self, coord: &Coord) {
+        board
+            .squares
+            .entry(coord.clone())
+            .and_modify(|s| (*s).piece = None);
     }
 }
 
@@ -59,7 +75,7 @@ impl TryFrom<&str> for Board {
                             file: FILES[file_index],
                         };
                         let piece = Piece::try_from(rank_part)?;
-                        Board::place(&mut board, coord, piece);
+                        Board::place(&mut board, &coord, piece);
                         file_index += 1;
                     }
                     _ => {
@@ -128,21 +144,33 @@ mod tests {
     fn place_normal() {
         let coord = Coord { rank: 'a', file: '1' };
         let piece = Piece::Rook(Side::White);
-        let mut board = Board::new();
-        Board::place(&mut board, coord, piece);
-        let coord = Coord { rank: 'a', file: '1' };
+        let mut board = Board::empty();
+        Board::place(&mut board, &coord, piece);
         assert_eq!(Some(piece), board.squares.get(&coord).and_then(|s| s.piece));
     }
 
     #[test]
     fn place_overwrites() {
         let coord = Coord { rank: 'a', file: '1' };
-        let piece = Piece::Pawn(Side::White);
-        let Ok(mut board) = Board::try_from(STANDARD_FEN) else {
-            panic!("impossible fen");
-        };
-        Board::place(&mut board, coord, piece);
-        let coord = Coord { rank: 'a', file: '1' };
+        let piece = Piece::Pawn(Side::Black);
+        let mut board = Board::standard();
+        Board::place(&mut board, &coord, piece);
         assert_eq!(Some(piece), board.squares.get(&coord).and_then(|s| s.piece));
+    }
+
+    #[test]
+    fn remove_normal() {
+        let mut board = Board::standard();
+        let coord = Coord { rank: 'a', file: '1' };
+        Board::remove(&mut board, &coord);
+        assert_eq!(None, board.squares.get(&coord).and_then(|s| s.piece));
+    }
+
+    #[test]
+    fn remove_empty() {
+        let mut board = Board::standard();
+        let coord = Coord { rank: 'e', file: '1' };
+        Board::remove(&mut board, &coord);
+        assert_eq!(None, board.squares.get(&coord).and_then(|s| s.piece));
     }
 }

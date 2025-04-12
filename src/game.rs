@@ -1,4 +1,4 @@
-use crate::board::{Board, STANDARD_FEN};
+use crate::board::Board;
 //use crate::coord::Coord;
 //use crate::piece::Piece;
 
@@ -15,9 +15,7 @@ pub struct Game {
 
 impl Game {
     pub fn new() -> Self {
-        let Ok(board) = Board::try_from(STANDARD_FEN) else {
-            panic!("impossible fen");
-        };
+        let board = Board::standard();
 
         Game {
             board,
@@ -29,4 +27,10 @@ impl Game {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn first_player_white() {
+        let game = Game::new();
+        assert_eq!(Side::White, game.active_color);
+    }
 }
