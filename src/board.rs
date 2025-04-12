@@ -2,14 +2,8 @@ use crate::coord::{FILES, RANKS};
 use crate::{coord::Coord, piece::Piece};
 use std::collections::HashMap;
 
-#[derive(Debug)]
-pub struct Square {
-    //coord: Coord,
-    piece: Option<Piece>,
-}
-
 pub struct Board {
-    squares: HashMap<Coord, Square>,
+    squares: HashMap<Coord, Option<Piece>>,
 }
 
 pub const STANDARD_FEN: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
@@ -20,11 +14,7 @@ impl Board {
         for rank in RANKS {
             for file in FILES {
                 let coord = Coord { rank, file };
-                let square = Square {
-                    //coord: coord.clone(),
-                    piece: None,
-                };
-                squares.insert(coord, square);
+                squares.insert(coord, None);
             }
         }
         Board { squares }
@@ -39,18 +29,25 @@ impl Board {
         board
     }
 
+    pub fn piece_at(board: &Self, coord: &Coord) -> Option<Piece> {
+        match board.squares.get(&coord) {
+            Some(piece_opt) => *piece_opt,
+            _ => panic!(),
+        }
+    }
+
     pub fn place(board: &mut Self, coord: &Coord, piece: Piece) {
         board
             .squares
             .entry(coord.clone())
-            .and_modify(|s| (*s).piece = Some(piece));
+            .and_modify(|s| *s = Some(piece));
     }
 
     pub fn remove(board: &mut Self, coord: &Coord) {
         board
             .squares
             .entry(coord.clone())
-            .and_modify(|s| (*s).piece = None);
+            .and_modify(|s| *s = None);
     }
 }
 
@@ -97,10 +94,8 @@ impl Into<String> for Board {
             let mut rank_fen = String::new();
             let mut empty_count = 0;
             for file in FILES {
-                let Some(square) = self.squares.get(&Coord { rank, file }) else {
-                    panic!()
-                };
-                match &square.piece {
+                let piece_option = Self::piece_at(&self, &Coord { rank, file });
+                match &piece_option {
                     Some(piece) => {
                         if empty_count > 0 {
                             rank_fen.push_str(&empty_count.to_string());
@@ -146,7 +141,7 @@ mod tests {
         let piece = Piece::Rook(Side::White);
         let mut board = Board::empty();
         Board::place(&mut board, &coord, piece);
-        assert_eq!(Some(piece), board.squares.get(&coord).and_then(|s| s.piece));
+        assert_eq!(Some(piece), Board::piece_at(&board, &coord));
     }
 
     #[test]
@@ -155,7 +150,7 @@ mod tests {
         let piece = Piece::Pawn(Side::Black);
         let mut board = Board::standard();
         Board::place(&mut board, &coord, piece);
-        assert_eq!(Some(piece), board.squares.get(&coord).and_then(|s| s.piece));
+        assert_eq!(Some(piece), Board::piece_at(&board, &coord));
     }
 
     #[test]
@@ -163,7 +158,7 @@ mod tests {
         let mut board = Board::standard();
         let coord = Coord { rank: 'a', file: '1' };
         Board::remove(&mut board, &coord);
-        assert_eq!(None, board.squares.get(&coord).and_then(|s| s.piece));
+        assert_eq!(None, Board::piece_at(&board, &coord));
     }
 
     #[test]
@@ -171,6 +166,6 @@ mod tests {
         let mut board = Board::standard();
         let coord = Coord { rank: 'e', file: '1' };
         Board::remove(&mut board, &coord);
-        assert_eq!(None, board.squares.get(&coord).and_then(|s| s.piece));
+        assert_eq!(None, Board::piece_at(&board, &coord));
     }
 }

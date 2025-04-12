@@ -13,7 +13,6 @@ pub enum Piece {
 impl TryFrom<char> for Piece {
     type Error = ();
     fn try_from(fen: char) -> Result<Self, Self::Error> {
-        println!("Piece#try_from {}", fen);
         match fen {
             'r' => Ok(Piece::Rook(Side::White)),
             'n' => Ok(Piece::Knight(Side::White)),
