@@ -2,7 +2,7 @@ use crate::board::{Board, STANDARD_FEN};
 //use crate::coord::Coord;
 //use crate::piece::Piece;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Side {
     Black,
     White,

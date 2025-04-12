@@ -1,6 +1,6 @@
 use crate::game::Side;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Piece {
     King(Side),
     Queen(Side),

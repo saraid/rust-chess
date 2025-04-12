@@ -2,6 +2,7 @@ use crate::coord::{FILES, RANKS};
 use crate::{coord::Coord, piece::Piece};
 use std::collections::HashMap;
 
+#[derive(Debug)]
 pub struct Square {
     //coord: Coord,
     piece: Option<Piece>,
@@ -129,6 +130,19 @@ mod tests {
         let piece = Piece::Rook(Side::White);
         let mut board = Board::new();
         Board::place(&mut board, coord, piece);
-        assert_eq!(Some(piece), board.squares.get(coord));
+        let coord = Coord { rank: 'a', file: '1' };
+        assert_eq!(Some(piece), board.squares.get(&coord).and_then(|s| s.piece));
+    }
+
+    #[test]
+    fn place_overwrites() {
+        let coord = Coord { rank: 'a', file: '1' };
+        let piece = Piece::Pawn(Side::White);
+        let Ok(mut board) = Board::try_from(STANDARD_FEN) else {
+            panic!("impossible fen");
+        };
+        Board::place(&mut board, coord, piece);
+        let coord = Coord { rank: 'a', file: '1' };
+        assert_eq!(Some(piece), board.squares.get(&coord).and_then(|s| s.piece));
     }
 }
