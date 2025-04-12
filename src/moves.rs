@@ -1,8 +1,10 @@
 use crate::coord::Coord;
 use crate::game::Side;
 use crate::piece::Piece;
+use std::fmt;
 
 pub mod pawn;
+pub mod rook;
 
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub enum Move {
@@ -12,6 +14,32 @@ pub enum Move {
     EnPassant(/* origin */ Coord),
     Promotion(/* origin */ Coord, /* destination */ Coord, Piece),
     Castle,
+}
+
+impl Into<String> for Move {
+    fn into(self) -> String {
+        match self {
+            Move::Basic(origin, destination) => {
+                let mut debug = String::new();
+                debug.push_str("Basic(origin=");
+                debug.push_str(&origin.to_string());
+                todo!();
+                return debug;
+            },
+            _ => todo!()
+        }
+    }
+}
+
+impl fmt::Display for Move {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Move::Basic(origin, destination) => {
+                write!(f, "Basic(origin={} destination={})", &origin.to_string(), &destination.to_string())
+            }
+            _ => todo!()
+        }
+    }
 }
 
 pub struct CastlingAvailability {
