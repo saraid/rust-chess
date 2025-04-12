@@ -1,5 +1,6 @@
 use crate::board::Board;
 use crate::coord::Coord;
+use crate::moves::{CastlingAvailability, Move, pawn};
 use crate::piece::Piece;
 use regex::Regex;
 use std::collections::HashSet;
@@ -17,90 +18,6 @@ pub struct Game {
     pub en_passant_target: Option<Coord>,
     pub half_move_clock: u32,
     pub full_move_clock: u32,
-}
-
-pub struct CastlingAvailability {
-    kingside_white: bool,
-    queenside_white: bool,
-    kingside_black: bool,
-    queenside_black: bool,
-}
-
-pub enum Castle {
-    Kingside(Side),
-    Queenside(Side),
-}
-
-impl CastlingAvailability {
-    pub fn all() -> Self {
-        Self {
-            kingside_white: true,
-            queenside_white: true,
-            kingside_black: true,
-            queenside_black: true,
-        }
-    }
-
-    pub fn none() -> Self {
-        Self {
-            kingside_white: false,
-            queenside_white: false,
-            kingside_black: false,
-            queenside_black: false,
-        }
-    }
-
-    pub fn from_fen(fen: &str) -> Self {
-        if fen == "-" {
-            return Self::none();
-        }
-
-        let mut ca = Self::none();
-        for part in fen.chars() {
-            match part {
-                'K' => ca.kingside_white = true,
-                'Q' => ca.queenside_white = true,
-                'k' => ca.kingside_black = true,
-                'q' => ca.queenside_black = true,
-                _ => panic!("invalid fen value"),
-            }
-        }
-        ca
-    }
-
-    pub fn to_fen(&self) -> String {
-        let mut fen = String::new();
-        if self.kingside_white { fen.push_str("K"); }
-        if self.queenside_white { fen.push_str("Q"); }
-        if self.kingside_black { fen.push_str("k"); }
-        if self.queenside_black { fen.push_str("q"); }
-        if fen.is_empty()
-        { return String::from("-"); }
-        fen
-    }
-
-    pub fn available(&self, castle: &Castle) -> bool {
-        match castle {
-            Castle::Kingside(side) => match side {
-                Side::White => self.kingside_white,
-                Side::Black => self.kingside_black,
-            },
-            Castle::Queenside(side) => match side {
-                Side::White => self.queenside_white,
-                Side::Black => self.queenside_black,
-            },
-        }
-    }
-}
-
-#[derive(Debug, Eq, Hash, PartialEq)]
-pub enum Move {
-    Basic(/* origin */ Coord, /* destination */ Coord),
-    Capture(/* origin */ Coord, /* destination */ Coord),
-    DoubleAdvance(/* destination */ Coord, /* en passant */ Coord),
-    EnPassant(/* origin */ Coord),
-    Promotion(/* origin */ Coord, /* destination */ Coord, Piece),
-    Castle,
 }
 
 impl Game {
@@ -159,88 +76,10 @@ impl Game {
 
     pub fn move_set(game: &Self, coord: &Coord) -> HashSet<Move> {
         match Board::piece_at(&game.board, &coord) {
-            Some(piece) => {
-                let mut moves = HashSet::new();
-                match piece {
-                    Piece::Pawn(side) => {
-                        // basic
-                        let Some(candidate) = Coord::next_rank(&coord, &side, 1) else {
-                            panic!("this pawn should have been promoted");
-                        };
-                        if Board::piece_at(&game.board, &candidate).is_none() {
-                            moves.insert(Move::Basic(coord.clone(), candidate));
-                        }
-
-                        // double advance
-                        fn pawn_start_rank(side: &Side) -> char {
-                            match side {
-                                Side::White => '7',
-                                Side::Black => '2',
-                            }
-                        }
-
-                        if coord.rank == pawn_start_rank(&side) {
-                            let Some(candidate) = Coord::next_rank(&coord, &side, 2) else {
-                                panic!("this pawn isn't at start rank");
-                            };
-                            let Some(en_passant_target) = Coord::next_rank(&coord, &side, 1) else {
-                                panic!("this pawn isn't at start rank");
-                            };
-                            if Board::piece_at(&game.board, &en_passant_target).is_none()
-                                && Board::piece_at(&game.board, &candidate).is_none()
-                            {
-                                moves.insert(Move::DoubleAdvance(candidate, en_passant_target));
-                            }
-                        }
-
-                        // captures
-                        match Coord::next_rank(&coord, &side, 1)
-                            .and_then(|c| Coord::positive_file(&c, 1))
-                        {
-                            Some(candidate) => {
-                                match &game.en_passant_target {
-                                    Some(_target) => {
-                                        moves.insert(Move::EnPassant(coord.clone()));
-                                    }
-                                    None => {}
-                                }
-                                match Board::piece_at(&game.board, &candidate)
-                                    .filter(|p| Piece::side(p) != &side)
-                                {
-                                    Some(_) => {
-                                        moves.insert(Move::Capture(coord.clone(), candidate));
-                                    }
-                                    None => {}
-                                }
-                            }
-                            None => {}
-                        }
-                        match Coord::next_rank(&coord, &side, 1)
-                            .and_then(|c| Coord::negative_file(&c, 1))
-                        {
-                            Some(candidate) => {
-                                match &game.en_passant_target {
-                                    Some(_target) => {
-                                        moves.insert(Move::EnPassant(coord.clone()));
-                                    }
-                                    None => {}
-                                }
-                                match Board::piece_at(&game.board, &candidate)
-                                    .filter(|p| Piece::side(p) != &side)
-                                {
-                                    Some(_) => {
-                                        moves.insert(Move::Capture(coord.clone(), candidate));
-                                    }
-                                    None => {}
-                                }
-                            }
-                            None => {}
-                        }
-                    }
-                    _ => todo!(),
-                }
-                moves
-            }
+            Some(piece) => match piece {
+                Piece::Pawn(side) => pawn::move_set(&game, &coord, &side),
+                _ => todo!(),
+            },
             None => HashSet::new(),
         }
     }
