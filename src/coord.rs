@@ -258,10 +258,12 @@ mod tests {
     }
 
     #[test]
-    fn from_invalid() {
-        let Err(error) = Coord::try_from("a9") else {
-            todo!()
-        };
-        assert_eq!(CoordParseError::BadRank, error);
+    fn from_invalid_rank() {
+        assert_eq!(Coord::try_from("a9").err(), Some(CoordParseError::BadRank));
+    }
+
+    #[test]
+    fn from_invalid_file() {
+        assert_eq!(Coord::try_from("z1").err(), Some(CoordParseError::BadFile));
     }
 }

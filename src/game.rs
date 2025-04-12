@@ -227,50 +227,23 @@ mod tests {
     #[test]
     fn pawn_moves_from_start() {
         let game = Game::new();
-        let set = Game::move_set(
-            &game,
-            &Coord {
-                rank: '2',
-                file: 'e',
-            },
-        );
+        let set = Game::move_set(&game, &Coord::try_from("e2").unwrap());
         println!("{:?}", set);
         assert_eq!(2, set.len());
-        assert!(set.contains(&Move::Base(Coord {
-            rank: '3',
-            file: 'e'
-        })));
+        assert!(set.contains(&Move::Base(Coord::try_from("e3").unwrap())));
         assert!(set.contains(&Move::DoubleAdvance(
-            Coord {
-                rank: '4',
-                file: 'e'
-            },
-            Coord {
-                rank: '3',
-                file: 'e'
-            }
+            Coord::try_from("e4").unwrap(),
+            Coord::try_from("e3").unwrap(),
         )));
     }
 
     #[test]
     fn pawn_moves_include_en_passant() {
         let game = Game::from_fen("8/8/8/3pP3/8/8/8/8 w KQkq d6 0 1");
-        let set = Game::move_set(
-            &game,
-            &Coord {
-                rank: '5',
-                file: 'e',
-            },
-        );
+        let set = Game::move_set(&game, &Coord::try_from("e5").unwrap());
         println!("{:?}", set);
         assert_eq!(2, set.len());
-        assert!(set.contains(&Move::Base(Coord {
-            rank: '6',
-            file: 'e',
-        })));
-        assert!(set.contains(&Move::Capture(Coord {
-            rank: '6',
-            file: 'd',
-        })));
+        assert!(set.contains(&Move::Base(Coord::try_from("e6").unwrap())));
+        assert!(set.contains(&Move::Capture(Coord::try_from("d6").unwrap())));
     }
 }

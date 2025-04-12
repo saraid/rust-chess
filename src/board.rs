@@ -138,10 +138,7 @@ mod tests {
 
     #[test]
     fn place_normal() {
-        let coord = Coord {
-            rank: '1',
-            file: 'a',
-        };
+        let coord = Coord::try_from("a1").unwrap();
         let piece = Piece::Rook(Side::White);
         let mut board = Board::empty();
         Board::place(&mut board, &coord, piece);
@@ -150,10 +147,7 @@ mod tests {
 
     #[test]
     fn place_overwrites() {
-        let coord = Coord {
-            rank: '1',
-            file: 'a',
-        };
+        let coord = Coord::try_from("a1").unwrap();
         let piece = Piece::Pawn(Side::Black);
         let mut board = Board::standard();
         Board::place(&mut board, &coord, piece);
@@ -163,10 +157,7 @@ mod tests {
     #[test]
     fn remove_normal() {
         let mut board = Board::standard();
-        let coord = Coord {
-            rank: '1',
-            file: 'a',
-        };
+        let coord = Coord::try_from("a1").unwrap();
         Board::remove(&mut board, &coord);
         assert_eq!(None, Board::piece_at(&board, &coord));
     }
@@ -174,10 +165,7 @@ mod tests {
     #[test]
     fn remove_empty() {
         let mut board = Board::standard();
-        let coord = Coord {
-            rank: '1',
-            file: 'e',
-        };
+        let coord = Coord::try_from("e1").unwrap();
         Board::remove(&mut board, &coord);
         assert_eq!(None, Board::piece_at(&board, &coord));
     }
