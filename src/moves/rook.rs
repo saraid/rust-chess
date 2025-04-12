@@ -1,35 +1,7 @@
-use crate::board::Board;
 use crate::coord::{Coord, FILES, RANKS};
 use crate::game::{Game, Side};
-use crate::moves::Move;
-use crate::piece::Piece;
+use crate::moves::{Move, process_candidates_in_line};
 use std::collections::HashSet;
-
-fn process_candidates_in_line(
-    board: &Board,
-    origin: &Coord,
-    candidates: Vec<Coord>,
-    side: &Side,
-    moves: &mut HashSet<Move>,
-) {
-    for candidate in candidates {
-        let piece_at_candidate = Board::piece_at(&board, &candidate);
-        match piece_at_candidate {
-            Some(p) if Piece::side(&p) != side => {
-                println!("Capture {}", candidate);
-                moves.insert(Move::Capture(origin.clone(), candidate));
-                return;
-            }
-            Some(_) => {
-                return;
-            }
-            None => {
-                println!("Basic {}", candidate);
-                moves.insert(Move::Basic(origin.clone(), candidate));
-            }
-        }
-    }
-}
 
 pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
     let mut moves = HashSet::new();

@@ -1,6 +1,8 @@
+use crate::board::Board;
 use crate::coord::Coord;
 use crate::game::Side;
 use crate::piece::Piece;
+use std::collections::HashSet;
 use std::fmt;
 
 pub mod pawn;
@@ -43,6 +45,33 @@ impl fmt::Display for Move {
         }
     }
 }
+
+pub fn process_candidates_in_line(
+    board: &Board,
+    origin: &Coord,
+    candidates: Vec<Coord>,
+    side: &Side,
+    moves: &mut HashSet<Move>,
+) {
+    for candidate in candidates {
+        let piece_at_candidate = Board::piece_at(&board, &candidate);
+        match piece_at_candidate {
+            Some(p) if Piece::side(&p) != side => {
+                println!("Capture {}", candidate);
+                moves.insert(Move::Capture(origin.clone(), candidate));
+                return;
+            }
+            Some(_) => {
+                return;
+            }
+            None => {
+                println!("Basic {}", candidate);
+                moves.insert(Move::Basic(origin.clone(), candidate));
+            }
+        }
+    }
+}
+
 
 pub struct CastlingAvailability {
     kingside_white: bool,
