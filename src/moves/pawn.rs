@@ -75,3 +75,60 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
     }
     moves
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn pawn_moves_from_start() {
+        let game = Game::new();
+        let set = Game::move_set(&game, &Coord::try_from("e2").unwrap());
+        println!("{:?}", set);
+        assert_eq!(2, set.len());
+        assert!(set.contains(&Move::Basic(
+            Coord::try_from("e2").unwrap(),
+            Coord::try_from("e3").unwrap()
+        )));
+        assert!(set.contains(&Move::DoubleAdvance(
+            Coord::try_from("e4").unwrap(),
+            Coord::try_from("e3").unwrap(),
+        )));
+    }
+
+    #[test]
+    fn pawn_moves_include_en_passant() {
+        let game = Game::from_fen("8/8/8/3pP3/8/8/8/8 w KQkq d6 0 1");
+        let set = Game::move_set(&game, &Coord::try_from("e5").unwrap());
+        println!("{:?}", set);
+        assert_eq!(2, set.len());
+        assert!(set.contains(&Move::Basic(
+            Coord::try_from("e5").unwrap(),
+            Coord::try_from("e6").unwrap()
+        )));
+        assert!(set.contains(&Move::EnPassant(Coord::try_from("e5").unwrap())));
+    }
+
+    #[test]
+    fn pawn_basic_move() {
+        let mut game = Game::from_fen("8/8/8/8/4P3/8/8/8 w - - 0 1");
+        let piece = Board::piece_at(&game.board, &Coord::try_from("e4").unwrap()).unwrap();
+        let set = Game::move_set(&game, &Coord::try_from("e4").unwrap());
+        assert_eq!(1, set.len());
+        Game::execute(
+            &mut game,
+            Move::Basic(
+                Coord::try_from("e4").unwrap(),
+                Coord::try_from("e5").unwrap(),
+            ),
+        );
+        assert_eq!(
+            Board::piece_at(&game.board, &Coord::try_from("e4").unwrap()),
+            None
+        );
+        assert_eq!(
+            Board::piece_at(&game.board, &Coord::try_from("e5").unwrap()),
+            Some(piece)
+        );
+    }
+}
