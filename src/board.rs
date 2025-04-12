@@ -126,7 +126,9 @@ mod tests {
     #[test]
     fn place_normal() {
         let coord = Coord { rank: 'a', file: '1' };
+        let piece = Piece::Rook(Side::White);
         let mut board = Board::new();
-        Board::place(&mut board, coord, Piece::Rook(Side::White));
+        Board::place(&mut board, coord, piece);
+        assert_eq!(Some(piece), board.squares.get(coord));
     }
 }
