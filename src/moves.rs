@@ -23,7 +23,9 @@ impl Into<String> for Move {
                 let mut debug = String::new();
                 debug.push_str("Basic(origin=");
                 debug.push_str(&origin.to_string());
-                todo!();
+                debug.push_str(",destination=");
+                debug.push_str(&destination.to_string());
+                debug.push_str(")");
                 return debug;
             },
             _ => todo!()
