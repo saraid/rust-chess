@@ -1,6 +1,6 @@
 use crate::board::Board;
 use crate::coord::Coord;
-use crate::moves::{CastlingAvailability, Move, pawn, rook};
+use crate::moves::{CastlingAvailability, Move, bishop, pawn, rook};
 use crate::piece::Piece;
 use regex::Regex;
 use std::collections::HashSet;
@@ -79,6 +79,7 @@ impl Game {
             Some(piece) => match piece {
                 Piece::Pawn(side) => pawn::move_set(&game, &coord, &side),
                 Piece::Rook(side) => rook::move_set(&game, &coord, &side),
+                Piece::Bishop(side) => bishop::move_set(&game, &coord, &side),
                 _ => todo!(),
             },
             None => HashSet::new(),

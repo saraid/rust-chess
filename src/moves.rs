@@ -5,6 +5,7 @@ use crate::piece::Piece;
 use std::collections::HashSet;
 use std::fmt;
 
+pub mod bishop;
 pub mod pawn;
 pub mod rook;
 
@@ -29,8 +30,8 @@ impl Into<String> for Move {
                 debug.push_str(&destination.to_string());
                 debug.push_str(")");
                 return debug;
-            },
-            _ => todo!()
+            }
+            _ => todo!(),
         }
     }
 }
@@ -39,9 +40,14 @@ impl fmt::Display for Move {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Move::Basic(origin, destination) => {
-                write!(f, "Basic(origin={} destination={})", &origin.to_string(), &destination.to_string())
+                write!(
+                    f,
+                    "Basic(origin={} destination={})",
+                    &origin.to_string(),
+                    &destination.to_string()
+                )
             }
-            _ => todo!()
+            _ => todo!(),
         }
     }
 }
@@ -71,7 +77,6 @@ pub fn process_candidates_in_line(
         }
     }
 }
-
 
 pub struct CastlingAvailability {
     kingside_white: bool,

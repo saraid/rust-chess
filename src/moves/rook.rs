@@ -10,32 +10,58 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
     process_candidates_in_line(
         &game.board,
         &coord,
-        RANKS[..rank_index].iter().rev().map(|rank| Coord { rank: *rank, file: coord.file }).collect(),
+        RANKS[..rank_index]
+            .iter()
+            .rev()
+            .map(|rank| Coord {
+                rank: *rank,
+                file: coord.file,
+            })
+            .collect(),
         &side,
-        &mut moves
+        &mut moves,
     );
     process_candidates_in_line(
         &game.board,
         &coord,
-        RANKS[rank_index + 1..].iter().map(|rank| Coord { rank: *rank, file: coord.file }).collect(),
+        RANKS[rank_index + 1..]
+            .iter()
+            .map(|rank| Coord {
+                rank: *rank,
+                file: coord.file,
+            })
+            .collect(),
         &side,
-        &mut moves
+        &mut moves,
     );
 
     let file_index: usize = FILES.iter().position(|n| *n == coord.file).unwrap();
     process_candidates_in_line(
         &game.board,
         &coord,
-        FILES[..file_index].iter().rev().map(|file| Coord { file: *file, rank: coord.rank }).collect(),
+        FILES[..file_index]
+            .iter()
+            .rev()
+            .map(|file| Coord {
+                file: *file,
+                rank: coord.rank,
+            })
+            .collect(),
         &side,
-        &mut moves
+        &mut moves,
     );
     process_candidates_in_line(
         &game.board,
         &coord,
-        FILES[file_index + 1..].iter().map(|file| Coord { file: *file, rank: coord.rank }).collect(),
+        FILES[file_index + 1..]
+            .iter()
+            .map(|file| Coord {
+                file: *file,
+                rank: coord.rank,
+            })
+            .collect(),
         &side,
-        &mut moves
+        &mut moves,
     );
 
     moves
@@ -66,6 +92,9 @@ mod tests {
         let set = Game::move_set(&game, &Coord::try_from("e4").unwrap());
         println!("{:?}", set);
         assert_eq!(14, set.len());
-        assert!(set.contains(&Move::Capture(Coord::try_from("e4").unwrap(), Coord::try_from("e1").unwrap())));
+        assert!(set.contains(&Move::Capture(
+            Coord::try_from("e4").unwrap(),
+            Coord::try_from("e1").unwrap()
+        )));
     }
 }
