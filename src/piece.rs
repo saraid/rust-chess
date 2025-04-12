@@ -10,6 +10,19 @@ pub enum Piece {
     Pawn(Side),
 }
 
+impl Piece {
+    pub fn side(piece: &Self) -> &Side {
+        match piece {
+            Piece::King(side) => side,
+            Piece::Queen(side) => side,
+            Piece::Bishop(side) => side,
+            Piece::Knight(side) => side,
+            Piece::Rook(side) => side,
+            Piece::Pawn(side) => side,
+        }
+    }
+}
+
 impl TryFrom<char> for Piece {
     type Error = ();
     fn try_from(fen: char) -> Result<Self, Self::Error> {

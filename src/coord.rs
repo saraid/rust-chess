@@ -1,7 +1,5 @@
-pub enum Side {
-    Black,
-    White,
-}
+use crate::game::Side;
+use std::fmt;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Coord {
@@ -91,6 +89,21 @@ impl TryFrom<&str> for Coord {
             return Err(CoordParseError::BadFile);
         };
         Ok(Coord { rank, file })
+    }
+}
+
+impl Into<String> for Coord {
+    fn into(self) -> String {
+        let mut san = String::new();
+        san.push_str(&self.rank.to_string());
+        san.push_str(&self.file.to_string());
+        san
+    }
+}
+
+impl fmt::Display for Coord {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}{}", &self.file.to_string(), &self.rank.to_string())
     }
 }
 

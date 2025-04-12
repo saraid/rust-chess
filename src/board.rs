@@ -20,7 +20,9 @@ impl Board {
         Board { squares }
     }
 
-    pub fn empty() -> Board { Board::new() }
+    pub fn empty() -> Board {
+        Board::new()
+    }
 
     pub fn standard() -> Board {
         let Ok(board) = Board::try_from(STANDARD_FEN) else {
@@ -44,10 +46,7 @@ impl Board {
     }
 
     pub fn remove(board: &mut Self, coord: &Coord) {
-        board
-            .squares
-            .entry(coord.clone())
-            .and_modify(|s| *s = None);
+        board.squares.entry(coord.clone()).and_modify(|s| *s = None);
     }
 }
 
@@ -137,7 +136,10 @@ mod tests {
 
     #[test]
     fn place_normal() {
-        let coord = Coord { rank: 'a', file: '1' };
+        let coord = Coord {
+            rank: 'a',
+            file: '1',
+        };
         let piece = Piece::Rook(Side::White);
         let mut board = Board::empty();
         Board::place(&mut board, &coord, piece);
@@ -146,7 +148,10 @@ mod tests {
 
     #[test]
     fn place_overwrites() {
-        let coord = Coord { rank: 'a', file: '1' };
+        let coord = Coord {
+            rank: 'a',
+            file: '1',
+        };
         let piece = Piece::Pawn(Side::Black);
         let mut board = Board::standard();
         Board::place(&mut board, &coord, piece);
@@ -156,7 +161,10 @@ mod tests {
     #[test]
     fn remove_normal() {
         let mut board = Board::standard();
-        let coord = Coord { rank: 'a', file: '1' };
+        let coord = Coord {
+            rank: 'a',
+            file: '1',
+        };
         Board::remove(&mut board, &coord);
         assert_eq!(None, Board::piece_at(&board, &coord));
     }
@@ -164,7 +172,10 @@ mod tests {
     #[test]
     fn remove_empty() {
         let mut board = Board::standard();
-        let coord = Coord { rank: 'e', file: '1' };
+        let coord = Coord {
+            rank: 'e',
+            file: '1',
+        };
         Board::remove(&mut board, &coord);
         assert_eq!(None, Board::piece_at(&board, &coord));
     }
