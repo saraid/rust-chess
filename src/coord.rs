@@ -7,8 +7,8 @@ pub struct Coord {
     pub file: char,
 }
 
-pub const RANKS: [char; 8] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-pub const FILES: [char; 8] = ['1', '2', '3', '4', '5', '6', '7', '8'];
+pub const FILES: [char; 8] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+pub const RANKS: [char; 8] = ['1', '2', '3', '4', '5', '6', '7', '8'];
 
 impl Coord {
     pub fn positive_rank(coord: &Self, steps: usize) -> Option<Coord> {
@@ -27,8 +27,8 @@ impl Coord {
     }
     pub fn next_rank(coord: &Self, side: &Side, steps: usize) -> Option<Coord> {
         match side {
-            Side::Black => Self::negative_rank(&coord, steps),
-            Side::White => Self::positive_rank(&coord, steps),
+            Side::Black => Self::positive_rank(&coord, steps),
+            Side::White => Self::negative_rank(&coord, steps),
         }
     }
 
@@ -46,14 +46,6 @@ impl Coord {
             rank: coord.rank,
         })
     }
-    /*
-    pub fn next_file(coord: &Self, side: &Side, steps: usize) -> Option<Coord> {
-        match side {
-            Side::Black => Self::negative_file(&coord, steps),
-            Side::White => Self::positive_file(&coord, steps),
-        }
-    }
-    */
 
     pub fn delta(coord: &Self, rank: isize, file: isize) -> Option<Coord> {
         if rank > 0 {
@@ -82,11 +74,11 @@ impl TryFrom<&str> for Coord {
 
     fn try_from(string: &str) -> Result<Self, Self::Error> {
         let mut chars = string.chars();
-        let Some(rank) = chars.next().filter(|r| RANKS.contains(r)) else {
-            return Err(CoordParseError::BadRank);
-        };
         let Some(file) = chars.next().filter(|f| FILES.contains(f)) else {
             return Err(CoordParseError::BadFile);
+        };
+        let Some(rank) = chars.next().filter(|r| RANKS.contains(r)) else {
+            return Err(CoordParseError::BadRank);
         };
         Ok(Coord { rank, file })
     }
@@ -95,8 +87,8 @@ impl TryFrom<&str> for Coord {
 impl Into<String> for Coord {
     fn into(self) -> String {
         let mut san = String::new();
-        san.push_str(&self.rank.to_string());
         san.push_str(&self.file.to_string());
+        san.push_str(&self.rank.to_string());
         san
     }
 }
@@ -114,16 +106,16 @@ mod tests {
     #[test]
     fn positive_rank_normal() {
         let given = Coord {
-            rank: 'a',
-            file: '1',
+            rank: '1',
+            file: 'a',
         };
         let Some(actual) = Coord::positive_rank(&given, 1) else {
             todo!()
         };
         assert_eq!(
             Coord {
-                rank: 'b',
-                file: '1'
+                rank: '2',
+                file: 'a'
             },
             actual
         )
@@ -132,8 +124,8 @@ mod tests {
     #[test]
     fn positive_rank_invalid() {
         let given = Coord {
-            rank: 'h',
-            file: '1',
+            rank: '8',
+            file: 'a',
         };
         let actual = Coord::positive_rank(&given, 1);
         assert_eq!(None, actual);
@@ -142,16 +134,16 @@ mod tests {
     #[test]
     fn negative_rank_normal() {
         let given = Coord {
-            rank: 'h',
-            file: '1',
+            rank: '8',
+            file: 'a',
         };
         let Some(actual) = Coord::negative_rank(&given, 1) else {
             todo!()
         };
         assert_eq!(
             Coord {
-                rank: 'g',
-                file: '1'
+                rank: '7',
+                file: 'a'
             },
             actual
         )
@@ -160,8 +152,8 @@ mod tests {
     #[test]
     fn negative_rank_invalid() {
         let given = Coord {
-            rank: 'a',
-            file: '1',
+            rank: '1',
+            file: 'a',
         };
         let actual = Coord::negative_rank(&given, 1);
         assert_eq!(None, actual);
@@ -170,16 +162,16 @@ mod tests {
     #[test]
     fn positive_file_normal() {
         let given = Coord {
-            rank: 'a',
-            file: '1',
+            rank: '1',
+            file: 'a',
         };
         let Some(actual) = Coord::positive_file(&given, 1) else {
             todo!()
         };
         assert_eq!(
             Coord {
-                rank: 'a',
-                file: '2'
+                rank: '1',
+                file: 'b'
             },
             actual
         )
@@ -188,8 +180,8 @@ mod tests {
     #[test]
     fn positive_file_invalid() {
         let given = Coord {
-            rank: 'a',
-            file: '8',
+            rank: '1',
+            file: 'h',
         };
         let actual = Coord::positive_file(&given, 1);
         assert_eq!(None, actual);
@@ -198,16 +190,16 @@ mod tests {
     #[test]
     fn negative_file_normal() {
         let given = Coord {
-            rank: 'a',
-            file: '2',
+            rank: '1',
+            file: 'h',
         };
         let Some(actual) = Coord::negative_file(&given, 1) else {
             todo!()
         };
         assert_eq!(
             Coord {
-                rank: 'a',
-                file: '1'
+                rank: '1',
+                file: 'g'
             },
             actual
         )
@@ -216,8 +208,8 @@ mod tests {
     #[test]
     fn negative_file_invalid() {
         let given = Coord {
-            rank: 'a',
-            file: '1',
+            rank: '1',
+            file: 'a',
         };
         let actual = Coord::negative_file(&given, 1);
         assert_eq!(None, actual);
@@ -226,16 +218,16 @@ mod tests {
     #[test]
     fn delta_normal() {
         let given = Coord {
-            rank: 'a',
-            file: '1',
+            rank: '1',
+            file: 'a',
         };
         let Some(actual) = Coord::delta(&given, 1, 1) else {
             todo!()
         };
         assert_eq!(
             Coord {
-                rank: 'b',
-                file: '2'
+                rank: '2',
+                file: 'b'
             },
             actual
         );
@@ -244,8 +236,8 @@ mod tests {
     #[test]
     fn delta_invalid() {
         let given = Coord {
-            rank: 'a',
-            file: '1',
+            rank: '1',
+            file: 'a',
         };
         let actual = Coord::delta(&given, -1, 1);
         assert_eq!(None, actual);
@@ -258,8 +250,8 @@ mod tests {
         };
         assert_eq!(
             Coord {
-                rank: 'a',
-                file: '1'
+                rank: '1',
+                file: 'a'
             },
             coord
         );
@@ -270,6 +262,6 @@ mod tests {
         let Err(error) = Coord::try_from("a9") else {
             todo!()
         };
-        assert_eq!(CoordParseError::BadFile, error);
+        assert_eq!(CoordParseError::BadRank, error);
     }
 }

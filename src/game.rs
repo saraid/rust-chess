@@ -1,9 +1,10 @@
 use crate::board::Board;
 use crate::coord::Coord;
 use crate::piece::Piece;
+use regex::Regex;
 use std::collections::HashSet;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Side {
     Black,
     White,
@@ -12,6 +13,83 @@ pub enum Side {
 pub struct Game {
     pub board: Board,
     pub active_color: Side,
+    pub castling_availability: CastlingAvailability,
+    pub en_passant_target: Option<Coord>,
+    pub half_move_clock: u32,
+    pub full_move_clock: u32,
+}
+
+pub struct CastlingAvailability {
+    kingside_white: bool,
+    queenside_white: bool,
+    kingside_black: bool,
+    queenside_black: bool,
+}
+
+pub enum Castle {
+    Kingside(Side),
+    Queenside(Side),
+}
+
+impl CastlingAvailability {
+    pub fn all() -> Self {
+        Self {
+            kingside_white: true,
+            queenside_white: true,
+            kingside_black: true,
+            queenside_black: true,
+        }
+    }
+
+    pub fn none() -> Self {
+        Self {
+            kingside_white: false,
+            queenside_white: false,
+            kingside_black: false,
+            queenside_black: false,
+        }
+    }
+
+    pub fn from_fen(fen: &str) -> Self {
+        if fen == "-" {
+            return Self::none();
+        }
+
+        let mut ca = Self::none();
+        for part in fen.chars() {
+            match part {
+                'K' => ca.kingside_white = true,
+                'Q' => ca.queenside_white = true,
+                'k' => ca.kingside_black = true,
+                'q' => ca.queenside_black = true,
+                _ => panic!("invalid fen value"),
+            }
+        }
+        ca
+    }
+
+    pub fn available(&self, castle: &Castle) -> bool {
+        match castle {
+            Castle::Kingside(side) => match side {
+                Side::White => self.kingside_white,
+                Side::Black => self.kingside_black,
+            },
+            Castle::Queenside(side) => match side {
+                Side::White => self.queenside_white,
+                Side::Black => self.queenside_black,
+            },
+        }
+    }
+}
+
+#[derive(Debug, Eq, Hash, PartialEq)]
+pub enum Move {
+    Base(Coord),
+    Capture(Coord),
+    DoubleAdvance(Coord, Coord),
+    EnPassant(Coord),
+    Promotion(Coord, Piece),
+    Castle,
 }
 
 impl Game {
@@ -21,10 +99,33 @@ impl Game {
         Game {
             board,
             active_color: Side::White,
+            castling_availability: CastlingAvailability::all(),
+            en_passant_target: None,
+            half_move_clock: 0,
+            full_move_clock: 0,
         }
     }
 
-    pub fn move_set(game: &Self, coord: &Coord) -> HashSet<Coord> {
+    pub fn from_fen(fen: &str) -> Game {
+        let game_fen_regex = Regex::new(r"(?<placement>[A-Za-z1-8/]+) (?<active_color>[wb]) (?<castling_availability>[KQkq]{1,4}|-) (?<en_passant_target>(?:[a-h][1-8])|-) (?<half_move_clock>\d+) (?<full_move_clock>\d+)").unwrap();
+        let Some(caps) = game_fen_regex.captures(fen) else {
+            panic!("not a game fen");
+        };
+        Game {
+            board: Board::try_from(&caps["placement"]).unwrap(),
+            active_color: match &caps["active_color"] {
+                "w" => Side::White,
+                "b" => Side::Black,
+                _ => panic!("invalid active color"),
+            },
+            castling_availability: CastlingAvailability::from_fen(&caps["castling_availability"]),
+            en_passant_target: Coord::try_from(&caps["en_passant_target"]).ok(),
+            half_move_clock: (&caps["half_move_clock"]).parse::<u32>().unwrap(),
+            full_move_clock: (&caps["full_move_clock"]).parse::<u32>().unwrap(),
+        }
+    }
+
+    pub fn move_set(game: &Self, coord: &Coord) -> HashSet<Move> {
         match Board::piece_at(&game.board, &coord) {
             Some(piece) => {
                 let mut moves = HashSet::new();
@@ -35,23 +136,28 @@ impl Game {
                             panic!("this pawn should have been promoted");
                         };
                         if Board::piece_at(&game.board, &candidate).is_none() {
-                            moves.insert(candidate);
+                            moves.insert(Move::Base(candidate));
                         }
 
                         // double advance
                         fn pawn_start_rank(side: &Side) -> char {
                             match side {
-                                Side::White => 'b',
-                                Side::Black => 'g',
+                                Side::White => '7',
+                                Side::Black => '2',
                             }
                         }
 
                         if coord.rank == pawn_start_rank(&side) {
                             let Some(candidate) = Coord::next_rank(&coord, &side, 2) else {
-                                panic!("this pawn should have been promoted");
+                                panic!("this pawn isn't at start rank");
                             };
-                            if Board::piece_at(&game.board, &candidate).is_none() {
-                                moves.insert(candidate);
+                            let Some(en_passant_target) = Coord::next_rank(&coord, &side, 1) else {
+                                panic!("this pawn isn't at start rank");
+                            };
+                            if Board::piece_at(&game.board, &en_passant_target).is_none()
+                                && Board::piece_at(&game.board, &candidate).is_none()
+                            {
+                                moves.insert(Move::DoubleAdvance(candidate, en_passant_target));
                             }
                         }
 
@@ -60,11 +166,17 @@ impl Game {
                             .and_then(|c| Coord::positive_file(&c, 1))
                         {
                             Some(candidate) => {
+                                match &game.en_passant_target {
+                                    Some(target) => {
+                                        moves.insert(Move::Capture(target.clone()));
+                                    }
+                                    None => {}
+                                }
                                 match Board::piece_at(&game.board, &candidate)
                                     .filter(|p| Piece::side(p) != &side)
                                 {
                                     Some(_) => {
-                                        moves.insert(candidate);
+                                        moves.insert(Move::Capture(candidate));
                                     }
                                     None => {}
                                 }
@@ -75,19 +187,23 @@ impl Game {
                             .and_then(|c| Coord::negative_file(&c, 1))
                         {
                             Some(candidate) => {
+                                match &game.en_passant_target {
+                                    Some(target) => {
+                                        moves.insert(Move::Capture(target.clone()));
+                                    }
+                                    None => {}
+                                }
                                 match Board::piece_at(&game.board, &candidate)
                                     .filter(|p| Piece::side(p) != &side)
                                 {
                                     Some(_) => {
-                                        moves.insert(candidate);
+                                        moves.insert(Move::Capture(candidate));
                                     }
                                     None => {}
                                 }
                             }
                             None => {}
                         }
-
-                        // en passant TODO
                     }
                     _ => panic!(),
                 }
@@ -111,8 +227,50 @@ mod tests {
     #[test]
     fn pawn_moves_from_start() {
         let game = Game::new();
-        let set = Game::move_set(&game, &Coord { rank: 'e', file: '2' });
+        let set = Game::move_set(
+            &game,
+            &Coord {
+                rank: '2',
+                file: 'e',
+            },
+        );
         println!("{:?}", set);
-        assert!(set.contains(&Coord { rank: 'f', file: '2' }));
+        assert_eq!(2, set.len());
+        assert!(set.contains(&Move::Base(Coord {
+            rank: '3',
+            file: 'e'
+        })));
+        assert!(set.contains(&Move::DoubleAdvance(
+            Coord {
+                rank: '4',
+                file: 'e'
+            },
+            Coord {
+                rank: '3',
+                file: 'e'
+            }
+        )));
+    }
+
+    #[test]
+    fn pawn_moves_include_en_passant() {
+        let game = Game::from_fen("8/8/8/3pP3/8/8/8/8 w KQkq d6 0 1");
+        let set = Game::move_set(
+            &game,
+            &Coord {
+                rank: '5',
+                file: 'e',
+            },
+        );
+        println!("{:?}", set);
+        assert_eq!(2, set.len());
+        assert!(set.contains(&Move::Base(Coord {
+            rank: '6',
+            file: 'e',
+        })));
+        assert!(set.contains(&Move::Capture(Coord {
+            rank: '6',
+            file: 'd',
+        })));
     }
 }

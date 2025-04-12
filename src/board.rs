@@ -55,7 +55,7 @@ impl TryFrom<&str> for Board {
 
     fn try_from(fen: &str) -> Result<Self, Self::Error> {
         let mut board = Board::new();
-        let mut rank_index: usize = 0;
+        let mut rank_index: usize = 7;
         for fen_rank in fen.split("/") {
             let mut file_index: usize = 0;
             for rank_part in fen_rank.chars() {
@@ -80,7 +80,9 @@ impl TryFrom<&str> for Board {
                     }
                 }
             }
-            rank_index += 1;
+            if rank_index > 0 {
+                rank_index -= 1;
+            }
         }
         Ok(board)
     }
@@ -89,7 +91,7 @@ impl TryFrom<&str> for Board {
 impl Into<String> for Board {
     fn into(self) -> String {
         let mut fen_parts = Vec::<String>::with_capacity(8);
-        for rank in RANKS {
+        for rank in RANKS.into_iter().rev().collect::<Vec<_>>() {
             let mut rank_fen = String::new();
             let mut empty_count = 0;
             for file in FILES {
@@ -137,8 +139,8 @@ mod tests {
     #[test]
     fn place_normal() {
         let coord = Coord {
-            rank: 'a',
-            file: '1',
+            rank: '1',
+            file: 'a',
         };
         let piece = Piece::Rook(Side::White);
         let mut board = Board::empty();
@@ -149,8 +151,8 @@ mod tests {
     #[test]
     fn place_overwrites() {
         let coord = Coord {
-            rank: 'a',
-            file: '1',
+            rank: '1',
+            file: 'a',
         };
         let piece = Piece::Pawn(Side::Black);
         let mut board = Board::standard();
@@ -162,8 +164,8 @@ mod tests {
     fn remove_normal() {
         let mut board = Board::standard();
         let coord = Coord {
-            rank: 'a',
-            file: '1',
+            rank: '1',
+            file: 'a',
         };
         Board::remove(&mut board, &coord);
         assert_eq!(None, Board::piece_at(&board, &coord));
@@ -173,8 +175,8 @@ mod tests {
     fn remove_empty() {
         let mut board = Board::standard();
         let coord = Coord {
-            rank: 'e',
-            file: '1',
+            rank: '1',
+            file: 'e',
         };
         Board::remove(&mut board, &coord);
         assert_eq!(None, Board::piece_at(&board, &coord));
