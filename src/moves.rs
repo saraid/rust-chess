@@ -6,7 +6,10 @@ use std::collections::HashSet;
 use std::fmt;
 
 pub mod bishop;
+pub mod king;
+pub mod knight;
 pub mod pawn;
+pub mod queen;
 pub mod rook;
 
 #[derive(Debug, Eq, Hash, PartialEq)]
@@ -52,6 +55,27 @@ impl fmt::Display for Move {
     }
 }
 
+pub fn process_candidates_arbitrarily(
+    board: &Board,
+    origin: &Coord,
+    candidates: Vec<Coord>,
+    side: &Side,
+    moves: &mut HashSet<Move>,
+) {
+    for candidate in candidates {
+        match Board::piece_at(&board, &candidate) {
+            Some(p) if Piece::side(&p) != side => {
+                println!("Capture {}", candidate);
+                moves.insert(Move::Capture(origin.clone(), candidate));
+            }
+            Some(_) => {}
+            None => {
+                println!("Basic {}", candidate);
+                moves.insert(Move::Basic(origin.clone(), candidate));
+            }
+        }
+    }
+}
 pub fn process_candidates_in_line(
     board: &Board,
     origin: &Coord,
@@ -158,5 +182,34 @@ impl CastlingAvailability {
                 Side::Black => self.queenside_black,
             },
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn process_candidates_arbitrarily_yields_basic_moves() {
+        let board = Board::try_from("8/8/8/8/4k3/8/8/8").unwrap();
+        let origin = Coord::try_from("e4").unwrap();
+        let candidates = vec![Coord::try_from("f2").unwrap()];
+        let side = Side::White;
+        let mut moves = HashSet::<Move>::new();
+        process_candidates_arbitrarily(&board, &origin, candidates.clone(), &side, &mut moves);
+
+        assert!(moves.contains(&Move::Basic(origin, candidates[0].clone())));
+    }
+
+    #[test]
+    fn process_candidates_arbitrarily_yields_captures() {
+        let board = Board::try_from("8/8/8/8/4k3/8/5P2/8").unwrap();
+        let origin = Coord::try_from("e4").unwrap();
+        let candidates = vec![Coord::try_from("f2").unwrap()];
+        let side = Side::White;
+        let mut moves = HashSet::<Move>::new();
+        process_candidates_arbitrarily(&board, &origin, candidates.clone(), &side, &mut moves);
+
+        assert!(moves.contains(&Move::Capture(origin, candidates[0].clone())));
     }
 }
