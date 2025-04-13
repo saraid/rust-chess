@@ -19,7 +19,8 @@ pub enum Move {
     DoubleAdvance(/* destination */ Coord, /* en passant */ Coord),
     EnPassant(/* origin */ Coord),
     Promotion(/* origin */ Coord, /* destination */ Coord, Piece),
-    Castle,
+    KingsideCastle(Side),
+    QueensideCastle(Side),
 }
 
 impl Into<String> for Move {
@@ -170,19 +171,6 @@ impl CastlingAvailability {
             return String::from("-");
         }
         fen
-    }
-
-    pub fn available(&self, castle: &Castle) -> bool {
-        match castle {
-            Castle::Kingside(side) => match side {
-                Side::White => self.kingside_white,
-                Side::Black => self.kingside_black,
-            },
-            Castle::Queenside(side) => match side {
-                Side::White => self.queenside_white,
-                Side::Black => self.queenside_black,
-            },
-        }
     }
 }
 

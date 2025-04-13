@@ -24,5 +24,20 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
     .collect();
     process_candidates_arbitrarily(&game.board, &coord, candidates, &side, &mut moves);
 
+    match side {
+        Side::Black => {
+            if game.castling_availability.kingside_black
+            { moves.insert(Move::KingsideCastle(Side::Black)); }
+            if game.castling_availability.queenside_black
+            { moves.insert(Move::QueensideCastle(Side::Black)); }
+        }
+        Side::White => {
+            if game.castling_availability.kingside_white
+            { moves.insert(Move::KingsideCastle(Side::White)); }
+            if game.castling_availability.queenside_white
+            { moves.insert(Move::QueensideCastle(Side::White)); }
+        }
+    }
+
     moves
 }
