@@ -83,7 +83,6 @@ mod tests {
     #[test]
     fn pawn_moves_from_start() {
         let game = Game::new();
-        println!("e2={:?}", Board::piece_at(&game.board, &Coord::try_from("e2").unwrap()));
         let set = Game::move_set(&game, &Coord::try_from("e2").unwrap());
         println!("{:?}", set);
         assert_eq!(2, set.len());

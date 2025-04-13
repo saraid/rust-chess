@@ -178,6 +178,9 @@ mod tests {
             ),
         )
         .unwrap();
-        assert_eq!(Board::piece_at(&game2.board, &Coord::try_from("f3").unwrap()), Some(Piece::Pawn(Side::White)));
+        assert_eq!(
+            Board::piece_at(&game2.board, &Coord::try_from("f3").unwrap()),
+            Some(Piece::Pawn(Side::White))
+        );
     }
 }
