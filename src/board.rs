@@ -32,8 +32,8 @@ impl Board {
         board
     }
 
-    pub fn piece_at(board: &Self, coord: &Coord) -> Option<Piece> {
-        match board.squares.get(&coord) {
+    pub fn piece_at(&self, coord: &Coord) -> Option<Piece> {
+        match self.squares.get(&coord) {
             Some(piece_opt) => *piece_opt,
             _ => panic!("attempted to get piece from non-existent square"),
         }
@@ -153,7 +153,7 @@ mod tests {
         let piece = Piece::Rook(Side::White);
         let mut board = Board::empty();
         Board::place(&mut board, &coord, piece);
-        assert_eq!(Some(piece), Board::piece_at(&board, &coord));
+        assert_eq!(Some(piece), board.piece_at(&coord));
     }
 
     #[test]
@@ -162,7 +162,7 @@ mod tests {
         let piece = Piece::Pawn(Side::Black);
         let mut board = Board::standard();
         Board::place(&mut board, &coord, piece);
-        assert_eq!(Some(piece), Board::piece_at(&board, &coord));
+        assert_eq!(Some(piece), board.piece_at(&coord));
     }
 
     #[test]
@@ -170,7 +170,7 @@ mod tests {
         let mut board = Board::standard();
         let coord = Coord::try_from("a1").unwrap();
         Board::remove(&mut board, &coord);
-        assert_eq!(None, Board::piece_at(&board, &coord));
+        assert_eq!(None, board.piece_at(&coord));
     }
 
     #[test]

@@ -1,4 +1,3 @@
-use crate::board::Board;
 use crate::coord::Coord;
 use crate::game::{Game, Side};
 use crate::moves::Move;
@@ -11,7 +10,7 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
     let Some(candidate) = Coord::next_rank(&coord, &side, 1) else {
         panic!("this pawn should have been promoted");
     };
-    if Board::piece_at(&game.board, &candidate).is_none() {
+    if game.board.piece_at(&candidate).is_none() {
         moves.insert(Move::Basic(coord.clone(), candidate));
     }
 
@@ -30,8 +29,8 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
         let Some(en_passant_target) = Coord::next_rank(&coord, &side, 1) else {
             panic!("this pawn isn't at start rank");
         };
-        if Board::piece_at(&game.board, &en_passant_target).is_none()
-            && Board::piece_at(&game.board, &candidate).is_none()
+        if game.board.piece_at(&en_passant_target).is_none()
+            && game.board.piece_at(&candidate).is_none()
         {
             moves.insert(Move::DoubleAdvance(candidate, en_passant_target));
         }
@@ -46,7 +45,7 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
                 }
                 None => {}
             }
-            match Board::piece_at(&game.board, &candidate).filter(|p| p.side() != side) {
+            match game.board.piece_at(&candidate).filter(|p| p.side() != side) {
                 Some(_) => {
                     moves.insert(Move::Capture(coord.clone(), candidate));
                 }
@@ -63,7 +62,7 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
                 }
                 None => {}
             }
-            match Board::piece_at(&game.board, &candidate).filter(|p| p.side() != side) {
+            match game.board.piece_at(&candidate).filter(|p| p.side() != side) {
                 Some(_) => {
                     moves.insert(Move::Capture(coord.clone(), candidate));
                 }

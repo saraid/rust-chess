@@ -64,7 +64,7 @@ pub fn process_candidates_arbitrarily(
     moves: &mut HashSet<Move>,
 ) {
     for candidate in candidates {
-        match Board::piece_at(&board, &candidate) {
+        match board.piece_at(&candidate) {
             Some(p) if p.side() != side => {
                 println!("Capture {}", candidate);
                 moves.insert(Move::Capture(origin.clone(), candidate));
@@ -85,7 +85,7 @@ pub fn process_candidates_in_line(
     moves: &mut HashSet<Move>,
 ) {
     for candidate in candidates {
-        let piece_at_candidate = Board::piece_at(&board, &candidate);
+        let piece_at_candidate = board.piece_at(&candidate);
         match piece_at_candidate {
             Some(p) if p.side() != side => {
                 println!("Capture {}", candidate);
@@ -109,11 +109,6 @@ pub struct CastlingAvailability {
     queenside_white: bool,
     kingside_black: bool,
     queenside_black: bool,
-}
-
-pub enum Castle {
-    Kingside(Side),
-    Queenside(Side),
 }
 
 impl CastlingAvailability {

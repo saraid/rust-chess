@@ -76,7 +76,7 @@ impl Game {
     }
 
     pub fn move_set(game: &Self, coord: &Coord) -> HashSet<Move> {
-        match Board::piece_at(&game.board, &coord) {
+        match game.board.piece_at(&coord) {
             Some(piece) => match piece {
                 Piece::Pawn(side) => pawn::move_set(&game, &coord, &side),
                 Piece::Rook(side) => rook::move_set(&game, &coord, &side),
@@ -92,7 +92,7 @@ impl Game {
     pub fn execute(game: &mut Self, move_to_take: Move) {
         match move_to_take {
             Move::Basic(origin, destination) => {
-                let piece = Board::piece_at(&game.board, &origin).unwrap();
+                let piece = game.board.piece_at(&origin).unwrap();
                 Board::remove(&mut game.board, &origin);
                 Board::place(&mut game.board, &destination, piece);
             }
@@ -121,7 +121,7 @@ impl Game {
         {
             match enemy_move {
                 Move::Capture(_origin, destination) => {
-                    if let Some(Piece::King(side)) = Board::piece_at(&game.board, &destination) {
+                    if let Some(Piece::King(side)) = game.board.piece_at(&destination) {
                         if side == game.active_color {
                             return true;
                         }
@@ -147,7 +147,7 @@ mod tests {
     #[test]
     fn pawn_basic_move() {
         let mut game = Game::from_fen("8/8/8/8/4P3/8/8/8 w - - 0 1");
-        let piece = Board::piece_at(&game.board, &Coord::try_from("e4").unwrap()).unwrap();
+        let piece = game.board.piece_at(&Coord::try_from("e4").unwrap()).unwrap();
         let set = Game::move_set(&game, &Coord::try_from("e4").unwrap());
         assert_eq!(1, set.len());
         Game::execute(
@@ -158,11 +158,11 @@ mod tests {
             ),
         );
         assert_eq!(
-            Board::piece_at(&game.board, &Coord::try_from("e4").unwrap()),
+            game.board.piece_at(&Coord::try_from("e4").unwrap()),
             None
         );
         assert_eq!(
-            Board::piece_at(&game.board, &Coord::try_from("e5").unwrap()),
+            game.board.piece_at(&Coord::try_from("e5").unwrap()),
             Some(piece)
         );
     }
@@ -179,7 +179,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(
-            Board::piece_at(&game2.board, &Coord::try_from("f3").unwrap()),
+            game2.board.piece_at(&Coord::try_from("f3").unwrap()),
             Some(Piece::Pawn(Side::White))
         );
     }
