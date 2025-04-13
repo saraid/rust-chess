@@ -27,8 +27,8 @@ impl Coord {
     }
     pub fn next_rank(coord: &Self, side: &Side, steps: usize) -> Option<Coord> {
         match side {
-            Side::Black => Self::positive_rank(&coord, steps),
-            Side::White => Self::negative_rank(&coord, steps),
+            Side::Black => Self::negative_rank(&coord, steps),
+            Side::White => Self::positive_rank(&coord, steps),
         }
     }
 

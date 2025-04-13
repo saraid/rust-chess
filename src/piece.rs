@@ -27,18 +27,18 @@ impl TryFrom<char> for Piece {
     type Error = ();
     fn try_from(fen: char) -> Result<Self, Self::Error> {
         match fen {
-            'r' => Ok(Piece::Rook(Side::White)),
-            'n' => Ok(Piece::Knight(Side::White)),
-            'b' => Ok(Piece::Bishop(Side::White)),
-            'q' => Ok(Piece::Queen(Side::White)),
-            'k' => Ok(Piece::King(Side::White)),
-            'p' => Ok(Piece::Pawn(Side::White)),
-            'R' => Ok(Piece::Rook(Side::Black)),
-            'N' => Ok(Piece::Knight(Side::Black)),
-            'B' => Ok(Piece::Bishop(Side::Black)),
-            'Q' => Ok(Piece::Queen(Side::Black)),
-            'K' => Ok(Piece::King(Side::Black)),
-            'P' => Ok(Piece::Pawn(Side::Black)),
+            'r' => Ok(Piece::Rook(Side::Black)),
+            'n' => Ok(Piece::Knight(Side::Black)),
+            'b' => Ok(Piece::Bishop(Side::Black)),
+            'q' => Ok(Piece::Queen(Side::Black)),
+            'k' => Ok(Piece::King(Side::Black)),
+            'p' => Ok(Piece::Pawn(Side::Black)),
+            'R' => Ok(Piece::Rook(Side::White)),
+            'N' => Ok(Piece::Knight(Side::White)),
+            'B' => Ok(Piece::Bishop(Side::White)),
+            'Q' => Ok(Piece::Queen(Side::White)),
+            'K' => Ok(Piece::King(Side::White)),
+            'P' => Ok(Piece::Pawn(Side::White)),
             _ => Err(()),
         }
     }
@@ -47,18 +47,18 @@ impl TryFrom<char> for Piece {
 impl Into<&str> for Piece {
     fn into(self) -> &'static str {
         match self {
-            Piece::King(Side::White) => "k",
-            Piece::Queen(Side::White) => "q",
-            Piece::Bishop(Side::White) => "b",
-            Piece::Knight(Side::White) => "n",
-            Piece::Rook(Side::White) => "r",
-            Piece::Pawn(Side::White) => "p",
-            Piece::King(Side::Black) => "K",
-            Piece::Queen(Side::Black) => "Q",
-            Piece::Bishop(Side::Black) => "B",
-            Piece::Knight(Side::Black) => "N",
-            Piece::Rook(Side::Black) => "R",
-            Piece::Pawn(Side::Black) => "P",
+            Piece::King(Side::Black) => "k",
+            Piece::Queen(Side::Black) => "q",
+            Piece::Bishop(Side::Black) => "b",
+            Piece::Knight(Side::Black) => "n",
+            Piece::Rook(Side::Black) => "r",
+            Piece::Pawn(Side::Black) => "p",
+            Piece::King(Side::White) => "K",
+            Piece::Queen(Side::White) => "Q",
+            Piece::Bishop(Side::White) => "B",
+            Piece::Knight(Side::White) => "N",
+            Piece::Rook(Side::White) => "R",
+            Piece::Pawn(Side::White) => "P",
         }
     }
 }

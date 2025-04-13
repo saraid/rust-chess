@@ -53,6 +53,7 @@ impl Board {
     }
 
     pub fn place(board: &mut Self, coord: &Coord, piece: Piece) {
+        println!("Placing {:?} at {}", piece, coord);
         board
             .squares
             .entry(coord.clone())

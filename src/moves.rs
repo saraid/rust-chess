@@ -204,7 +204,7 @@ mod tests {
 
     #[test]
     fn process_candidates_arbitrarily_yields_captures() {
-        let board = Board::try_from("8/8/8/8/4k3/8/5P2/8").unwrap();
+        let board = Board::try_from("8/8/8/8/4K3/8/5p2/8").unwrap();
         let origin = Coord::try_from("e4").unwrap();
         let candidates = vec![Coord::try_from("f2").unwrap()];
         let side = Side::White;
