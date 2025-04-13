@@ -2,7 +2,6 @@ use crate::board::Board;
 use crate::coord::Coord;
 use crate::game::{Game, Side};
 use crate::moves::Move;
-use crate::piece::Piece;
 use std::collections::HashSet;
 
 pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
@@ -47,7 +46,7 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
                 }
                 None => {}
             }
-            match Board::piece_at(&game.board, &candidate).filter(|p| Piece::side(p) != side) {
+            match Board::piece_at(&game.board, &candidate).filter(|p| p.side() != side) {
                 Some(_) => {
                     moves.insert(Move::Capture(coord.clone(), candidate));
                 }
@@ -64,7 +63,7 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
                 }
                 None => {}
             }
-            match Board::piece_at(&game.board, &candidate).filter(|p| Piece::side(p) != side) {
+            match Board::piece_at(&game.board, &candidate).filter(|p| p.side() != side) {
                 Some(_) => {
                     moves.insert(Move::Capture(coord.clone(), candidate));
                 }

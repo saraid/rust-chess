@@ -65,7 +65,7 @@ pub fn process_candidates_arbitrarily(
 ) {
     for candidate in candidates {
         match Board::piece_at(&board, &candidate) {
-            Some(p) if Piece::side(&p) != side => {
+            Some(p) if p.side() != side => {
                 println!("Capture {}", candidate);
                 moves.insert(Move::Capture(origin.clone(), candidate));
             }
@@ -87,7 +87,7 @@ pub fn process_candidates_in_line(
     for candidate in candidates {
         let piece_at_candidate = Board::piece_at(&board, &candidate);
         match piece_at_candidate {
-            Some(p) if Piece::side(&p) != side => {
+            Some(p) if p.side() != side => {
                 println!("Capture {}", candidate);
                 moves.insert(Move::Capture(origin.clone(), candidate));
                 return;

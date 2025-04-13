@@ -43,7 +43,7 @@ impl Board {
         let mut locs = HashSet::new();
         for (coord, piece) in board.squares.iter() {
             match piece {
-                Some(piece) if Piece::side(piece) == side => {
+                Some(piece) if piece.side() == side => {
                     locs.insert(coord.clone());
                 }
                 _ => {}

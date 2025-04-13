@@ -11,8 +11,8 @@ pub enum Piece {
 }
 
 impl Piece {
-    pub fn side(piece: &Self) -> &Side {
-        match piece {
+    pub fn side(&self) -> &Side {
+        match self {
             Piece::King(side) => side,
             Piece::Queen(side) => side,
             Piece::Bishop(side) => side,
