@@ -11,6 +11,7 @@ pub enum Side {
     White,
 }
 
+#[derive(Clone)]
 pub struct Game {
     pub board: Board,
     pub active_color: Side,
@@ -98,6 +99,39 @@ impl Game {
             _ => todo!(),
         }
     }
+    pub fn play(game: &Self, move_to_take: Move) -> Result<Game, &str> {
+        let mut after_play = game.clone();
+        Game::execute(&mut after_play, move_to_take);
+        if Game::in_check(&after_play) {
+            return Err("check");
+        }
+        Ok(after_play)
+    }
+
+    fn inactive_color(&self) -> Side {
+        match self.active_color {
+            Side::Black => Side::White,
+            Side::White => Side::Black,
+        }
+    }
+    pub fn in_check(game: &Self) -> bool {
+        for enemy_move in Board::all_pieces(&game.board, &Game::inactive_color(&game))
+            .iter()
+            .flat_map(|coord| Game::move_set(&game, &coord))
+        {
+            match enemy_move {
+                Move::Capture(_origin, destination) => {
+                    if let Some(Piece::King(side)) = Board::piece_at(&game.board, &destination) {
+                        if side == game.active_color {
+                            return true;
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+        false
+    }
 }
 
 #[cfg(test)]
@@ -108,5 +142,19 @@ mod tests {
     fn first_player_white() {
         let game = Game::new();
         assert_eq!(Side::White, game.active_color);
+    }
+
+    #[test]
+    fn fools_mate_first_move() {
+        let game = Game::new();
+        let game2 = Game::play(
+            &game,
+            Move::Basic(
+                Coord::try_from("f2").unwrap(),
+                Coord::try_from("f3").unwrap(),
+            ),
+        )
+        .unwrap();
+        assert_eq!(Board::piece_at(&game2.board, &Coord::try_from("f3").unwrap()), Some(Piece::Pawn(Side::White)));
     }
 }

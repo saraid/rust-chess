@@ -102,6 +102,7 @@ pub fn process_candidates_in_line(
     }
 }
 
+#[derive(Clone)]
 pub struct CastlingAvailability {
     kingside_white: bool,
     queenside_white: bool,

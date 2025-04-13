@@ -1,6 +1,6 @@
 use crate::coord::{FILES, RANKS};
-use crate::{coord::Coord, piece::Piece};
-use std::collections::HashMap;
+use crate::{coord::Coord, game::Side, piece::Piece};
+use std::collections::{HashMap, HashSet};
 
 #[derive(Clone)]
 pub struct Board {
@@ -37,6 +37,19 @@ impl Board {
             Some(piece_opt) => *piece_opt,
             _ => panic!("attempted to get piece from non-existent square"),
         }
+    }
+
+    pub fn all_pieces(board: &Self, side: &Side) -> HashSet<Coord> {
+        let mut locs = HashSet::new();
+        for (coord, piece) in board.squares.iter() {
+            match piece {
+                Some(piece) if Piece::side(piece) == side => {
+                    locs.insert(coord.clone());
+                }
+                _ => {}
+            }
+        }
+        locs
     }
 
     pub fn place(board: &mut Self, coord: &Coord, piece: Piece) {
