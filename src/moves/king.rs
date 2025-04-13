@@ -27,15 +27,15 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
     match side {
         Side::Black => {
             if game.castling_availability.kingside_black
-            { moves.insert(Move::KingsideCastle(Side::Black)); }
+            { moves.insert(Move::KingsideCastle); }
             if game.castling_availability.queenside_black
-            { moves.insert(Move::QueensideCastle(Side::Black)); }
+            { moves.insert(Move::QueensideCastle); }
         }
         Side::White => {
             if game.castling_availability.kingside_white
-            { moves.insert(Move::KingsideCastle(Side::White)); }
+            { moves.insert(Move::KingsideCastle); }
             if game.castling_availability.queenside_white
-            { moves.insert(Move::QueensideCastle(Side::White)); }
+            { moves.insert(Move::QueensideCastle); }
         }
     }
 

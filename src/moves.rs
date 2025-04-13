@@ -19,8 +19,8 @@ pub enum Move {
     DoubleAdvance(/* destination */ Coord, /* en passant */ Coord),
     EnPassant(/* origin */ Coord),
     Promotion(/* origin */ Coord, /* destination */ Coord, Piece),
-    KingsideCastle(Side),
-    QueensideCastle(Side),
+    KingsideCastle,
+    QueensideCastle,
 }
 
 impl Into<String> for Move {
