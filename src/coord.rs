@@ -11,53 +11,53 @@ pub const FILES: [char; 8] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 pub const RANKS: [char; 8] = ['1', '2', '3', '4', '5', '6', '7', '8'];
 
 impl Coord {
-    pub fn positive_rank(coord: &Self, steps: usize) -> Option<Coord> {
-        let index = RANKS.iter().position(|n| *n == coord.rank);
+    pub fn positive_rank(&self, steps: usize) -> Option<Coord> {
+        let index = RANKS.iter().position(|n| *n == self.rank);
         index.filter(|i| i + steps < RANKS.len()).map(|i| Coord {
             rank: RANKS[i + steps],
-            file: coord.file,
+            file: self.file,
         })
     }
-    pub fn negative_rank(coord: &Self, steps: usize) -> Option<Coord> {
-        let index = RANKS.iter().position(|n| *n == coord.rank);
+    pub fn negative_rank(&self, steps: usize) -> Option<Coord> {
+        let index = RANKS.iter().position(|n| *n == self.rank);
         index.filter(|i| steps <= *i).map(|i| Coord {
             rank: RANKS[i - steps],
-            file: coord.file,
+            file: self.file,
         })
     }
-    pub fn next_rank(coord: &Self, side: &Side, steps: usize) -> Option<Coord> {
+    pub fn next_rank(&self, side: &Side, steps: usize) -> Option<Coord> {
         match side {
-            Side::Black => Self::negative_rank(&coord, steps),
-            Side::White => Self::positive_rank(&coord, steps),
+            Side::Black => self.negative_rank(steps),
+            Side::White => self.positive_rank(steps),
         }
     }
 
-    pub fn positive_file(coord: &Self, steps: usize) -> Option<Coord> {
-        let index = FILES.iter().position(|n| *n == coord.file);
+    pub fn positive_file(&self, steps: usize) -> Option<Coord> {
+        let index = FILES.iter().position(|n| *n == self.file);
         index.filter(|i| i + steps < FILES.len()).map(|i| Coord {
             file: FILES[i + steps],
-            rank: coord.rank,
+            rank: self.rank,
         })
     }
-    pub fn negative_file(coord: &Self, steps: usize) -> Option<Coord> {
-        let index = FILES.iter().position(|n| *n == coord.file);
+    pub fn negative_file(&self, steps: usize) -> Option<Coord> {
+        let index = FILES.iter().position(|n| *n == self.file);
         index.filter(|i| steps <= *i).map(|i| Coord {
             file: FILES[i - steps],
-            rank: coord.rank,
+            rank: self.rank,
         })
     }
 
-    pub fn delta(coord: &Self, rank: isize, file: isize) -> Option<Coord> {
+    pub fn delta(&self, rank: isize, file: isize) -> Option<Coord> {
         if rank > 0 {
-            Self::positive_rank(coord, rank as usize)
+            self.positive_rank(rank as usize)
         } else {
-            Self::negative_rank(coord, rank.abs() as usize)
+            self.negative_rank(rank.abs() as usize)
         }
         .map(|intermediate_coord| {
             if file > 0 {
-                Self::positive_file(&intermediate_coord, file as usize)
+                intermediate_coord.positive_file(file as usize)
             } else {
-                Self::negative_file(&intermediate_coord, file.abs() as usize)
+                intermediate_coord.negative_file(file.abs() as usize)
             }
         })?
     }
@@ -109,7 +109,7 @@ mod tests {
             rank: '1',
             file: 'a',
         };
-        let Some(actual) = Coord::positive_rank(&given, 1) else {
+        let Some(actual) = given.positive_rank(1) else {
             todo!()
         };
         assert_eq!(
@@ -127,7 +127,7 @@ mod tests {
             rank: '8',
             file: 'a',
         };
-        let actual = Coord::positive_rank(&given, 1);
+        let actual = given.positive_rank(1);
         assert_eq!(None, actual);
     }
 
@@ -137,7 +137,7 @@ mod tests {
             rank: '8',
             file: 'a',
         };
-        let Some(actual) = Coord::negative_rank(&given, 1) else {
+        let Some(actual) = given.negative_rank(1) else {
             todo!()
         };
         assert_eq!(
@@ -155,7 +155,7 @@ mod tests {
             rank: '1',
             file: 'a',
         };
-        let actual = Coord::negative_rank(&given, 1);
+        let actual = given.negative_rank(1);
         assert_eq!(None, actual);
     }
 
@@ -165,7 +165,7 @@ mod tests {
             rank: '1',
             file: 'a',
         };
-        let Some(actual) = Coord::positive_file(&given, 1) else {
+        let Some(actual) = given.positive_file(1) else {
             todo!()
         };
         assert_eq!(
@@ -183,7 +183,7 @@ mod tests {
             rank: '1',
             file: 'h',
         };
-        let actual = Coord::positive_file(&given, 1);
+        let actual = given.positive_file(1);
         assert_eq!(None, actual);
     }
 
@@ -193,7 +193,7 @@ mod tests {
             rank: '1',
             file: 'h',
         };
-        let Some(actual) = Coord::negative_file(&given, 1) else {
+        let Some(actual) = given.negative_file(1) else {
             todo!()
         };
         assert_eq!(
@@ -211,7 +211,7 @@ mod tests {
             rank: '1',
             file: 'a',
         };
-        let actual = Coord::negative_file(&given, 1);
+        let actual = given.negative_file(1);
         assert_eq!(None, actual);
     }
 
@@ -221,7 +221,7 @@ mod tests {
             rank: '1',
             file: 'a',
         };
-        let Some(actual) = Coord::delta(&given, 1, 1) else {
+        let Some(actual) = given.delta(1, 1) else {
             todo!()
         };
         assert_eq!(
@@ -239,7 +239,7 @@ mod tests {
             rank: '1',
             file: 'a',
         };
-        let actual = Coord::delta(&given, -1, 1);
+        let actual = given.delta(-1, 1);
         assert_eq!(None, actual);
     }
 

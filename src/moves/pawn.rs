@@ -7,7 +7,7 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
     let mut moves = HashSet::new();
 
     // basic
-    let Some(candidate) = Coord::next_rank(&coord, &side, 1) else {
+    let Some(candidate) = coord.next_rank(&side, 1) else {
         panic!("this pawn should have been promoted");
     };
     if game.board.piece_at(&candidate).is_none() {
@@ -23,10 +23,10 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
     }
 
     if coord.rank == pawn_start_rank(&side) {
-        let Some(candidate) = Coord::next_rank(&coord, &side, 2) else {
+        let Some(candidate) = coord.next_rank(&side, 2) else {
             panic!("this pawn isn't at start rank");
         };
-        let Some(en_passant_target) = Coord::next_rank(&coord, &side, 1) else {
+        let Some(en_passant_target) = coord.next_rank(&side, 1) else {
             panic!("this pawn isn't at start rank");
         };
         if game.board.piece_at(&en_passant_target).is_none()
@@ -37,7 +37,7 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
     }
 
     // captures
-    match Coord::next_rank(&coord, &side, 1).and_then(|c| Coord::positive_file(&c, 1)) {
+    match coord.next_rank(&side, 1).and_then(|c| c.positive_file(1)) {
         Some(candidate) => {
             match &game.en_passant_target {
                 Some(_target) => {
@@ -54,7 +54,7 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
         }
         None => {}
     }
-    match Coord::next_rank(&coord, &side, 1).and_then(|c| Coord::negative_file(&c, 1)) {
+    match coord.next_rank(&side, 1).and_then(|c| c.negative_file(1)) {
         Some(candidate) => {
             match &game.en_passant_target {
                 Some(_target) => {
