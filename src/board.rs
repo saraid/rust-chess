@@ -138,16 +138,12 @@ mod tests {
 
     #[test]
     fn standard_fen_try_from_works() {
-        let Ok(_) = Board::try_from(STANDARD_FEN) else {
-            panic!("impossible fen");
-        };
+        Board::try_from(STANDARD_FEN).ok();
     }
 
     #[test]
     fn there_and_back_again() {
-        let Ok(board) = Board::try_from(STANDARD_FEN) else {
-            panic!("impossible fen");
-        };
+        let board = Board::try_from(STANDARD_FEN).unwrap();
         assert_eq!(String::from(STANDARD_FEN), Into::<String>::into(board));
     }
 
