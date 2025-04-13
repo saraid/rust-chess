@@ -14,7 +14,7 @@ pub mod rook;
 
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub enum Move {
-    Basic(/* origin */ Coord, /* destination */ Coord),
+    Basic { origin: Coord, destination: Coord },
     Capture(/* origin */ Coord, /* destination */ Coord),
     DoubleAdvance(/* destination */ Coord, /* en passant */ Coord),
     EnPassant(/* origin */ Coord),
@@ -26,7 +26,10 @@ pub enum Move {
 impl Into<String> for Move {
     fn into(self) -> String {
         match self {
-            Move::Basic(origin, destination) => {
+            Move::Basic {
+                origin,
+                destination,
+            } => {
                 let mut debug = String::new();
                 debug.push_str("Basic(origin=");
                 debug.push_str(&origin.to_string());
@@ -43,7 +46,10 @@ impl Into<String> for Move {
 impl fmt::Display for Move {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Move::Basic(origin, destination) => {
+            Move::Basic {
+                origin,
+                destination,
+            } => {
                 write!(
                     f,
                     "Basic(origin={} destination={})",
@@ -72,7 +78,10 @@ pub fn process_candidates_arbitrarily(
             Some(_) => {}
             None => {
                 println!("Basic {}", candidate);
-                moves.insert(Move::Basic(origin.clone(), candidate));
+                moves.insert(Move::Basic {
+                    origin: origin.clone(),
+                    destination: candidate,
+                });
             }
         }
     }
@@ -97,7 +106,10 @@ pub fn process_candidates_in_line(
             }
             None => {
                 println!("Basic {}", candidate);
-                moves.insert(Move::Basic(origin.clone(), candidate));
+                moves.insert(Move::Basic {
+                    origin: origin.clone(),
+                    destination: candidate,
+                });
             }
         }
     }
@@ -182,7 +194,10 @@ mod tests {
         let mut moves = HashSet::<Move>::new();
         process_candidates_arbitrarily(&board, &origin, candidates.clone(), &side, &mut moves);
 
-        assert!(moves.contains(&Move::Basic(origin, candidates[0].clone())));
+        assert!(moves.contains(&Move::Basic {
+            origin,
+            destination: candidates[0].clone()
+        }));
     }
 
     #[test]

@@ -11,7 +11,10 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
         panic!("this pawn should have been promoted");
     };
     if game.board.piece_at(&candidate).is_none() {
-        moves.insert(Move::Basic(coord.clone(), candidate));
+        moves.insert(Move::Basic {
+            origin: coord.clone(),
+            destination: candidate,
+        });
     }
 
     // double advance
@@ -84,10 +87,10 @@ mod tests {
         let set = Game::move_set(&game, &Coord::try_from("e2").unwrap());
         println!("{:?}", set);
         assert_eq!(2, set.len());
-        assert!(set.contains(&Move::Basic(
-            Coord::try_from("e2").unwrap(),
-            Coord::try_from("e3").unwrap()
-        )));
+        assert!(set.contains(&Move::Basic {
+            origin: Coord::try_from("e2").unwrap(),
+            destination: Coord::try_from("e3").unwrap()
+        }));
         assert!(set.contains(&Move::DoubleAdvance(
             Coord::try_from("e4").unwrap(),
             Coord::try_from("e3").unwrap(),

@@ -91,7 +91,10 @@ impl Game {
 
     pub fn execute(game: &mut Self, move_to_take: Move) {
         match move_to_take {
-            Move::Basic(origin, destination) => {
+            Move::Basic {
+                origin,
+                destination,
+            } => {
                 let piece = game.board.piece_at(&origin).unwrap();
                 Board::remove(&mut game.board, &origin);
                 Board::place(&mut game.board, &destination, piece);
@@ -147,7 +150,10 @@ mod tests {
     #[test]
     fn pawn_basic_move() {
         let mut game = Game::from_fen("8/8/8/8/4P3/8/8/8 w - - 0 1");
-        let piece = game.board.piece_at(&Coord::try_from("e4").unwrap()).unwrap();
+        let piece = game
+            .board
+            .piece_at(&Coord::try_from("e4").unwrap())
+            .unwrap();
         let set = Game::move_set(&game, &Coord::try_from("e4").unwrap());
         assert_eq!(1, set.len());
         Game::execute(
@@ -157,10 +163,7 @@ mod tests {
                 Coord::try_from("e5").unwrap(),
             ),
         );
-        assert_eq!(
-            game.board.piece_at(&Coord::try_from("e4").unwrap()),
-            None
-        );
+        assert_eq!(game.board.piece_at(&Coord::try_from("e4").unwrap()), None);
         assert_eq!(
             game.board.piece_at(&Coord::try_from("e5").unwrap()),
             Some(piece)

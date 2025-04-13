@@ -17,9 +17,7 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
         (-1, 2),
     ]
     .iter()
-    .flat_map(|(rank_delta, file_delta)| {
-        coord.delta(*rank_delta as isize, *file_delta as isize)
-    })
+    .flat_map(|(rank_delta, file_delta)| coord.delta(*rank_delta as isize, *file_delta as isize))
     .collect();
     process_candidates_arbitrarily(&game.board, &coord, candidates, &side, &mut moves);
 
