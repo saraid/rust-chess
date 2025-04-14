@@ -123,7 +123,7 @@ impl Game {
             .flat_map(|coord| Game::move_set(&game, &coord))
         {
             match enemy_move {
-                Move::Capture(_origin, destination) => {
+                Move::Capture { destination, origin: _ } => {
                     if let Some(Piece::King(side)) = game.board.piece_at(&destination) {
                         if side == game.active_color {
                             return true;
@@ -158,10 +158,10 @@ mod tests {
         assert_eq!(1, set.len());
         Game::execute(
             &mut game,
-            Move::Basic(
-                Coord::try_from("e4").unwrap(),
-                Coord::try_from("e5").unwrap(),
-            ),
+            Move::Basic {
+                origin: Coord::try_from("e4").unwrap(),
+                destination: Coord::try_from("e5").unwrap(),
+            },
         );
         assert_eq!(game.board.piece_at(&Coord::try_from("e4").unwrap()), None);
         assert_eq!(
@@ -175,10 +175,10 @@ mod tests {
         let game = Game::new();
         let game2 = Game::play(
             &game,
-            Move::Basic(
-                Coord::try_from("f2").unwrap(),
-                Coord::try_from("f3").unwrap(),
-            ),
+            Move::Basic {
+                origin: Coord::try_from("f2").unwrap(),
+                destination: Coord::try_from("f3").unwrap(),
+            },
         )
         .unwrap();
         assert_eq!(

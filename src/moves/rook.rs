@@ -92,9 +92,9 @@ mod tests {
         let set = Game::move_set(&game, &Coord::try_from("e4").unwrap());
         println!("{:?}", set);
         assert_eq!(14, set.len());
-        assert!(set.contains(&Move::Capture(
-            Coord::try_from("e4").unwrap(),
-            Coord::try_from("e1").unwrap()
-        )));
+        assert!(set.contains(&Move::Capture{
+            origin: Coord::try_from("e4").unwrap(),
+            destination: Coord::try_from("e1").unwrap()
+        }));
     }
 }

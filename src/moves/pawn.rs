@@ -50,7 +50,7 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
             }
             match game.board.piece_at(&candidate).filter(|p| p.side() != side) {
                 Some(_) => {
-                    moves.insert(Move::Capture(coord.clone(), candidate));
+                    moves.insert(Move::Capture { origin: coord.clone(), destination: candidate });
                 }
                 None => {}
             }
@@ -67,7 +67,7 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
             }
             match game.board.piece_at(&candidate).filter(|p| p.side() != side) {
                 Some(_) => {
-                    moves.insert(Move::Capture(coord.clone(), candidate));
+                    moves.insert(Move::Capture { origin: coord.clone(), destination: candidate });
                 }
                 None => {}
             }
@@ -103,10 +103,10 @@ mod tests {
         let set = Game::move_set(&game, &Coord::try_from("e5").unwrap());
         println!("{:?}", set);
         assert_eq!(2, set.len());
-        assert!(set.contains(&Move::Basic(
-            Coord::try_from("e5").unwrap(),
-            Coord::try_from("e6").unwrap()
-        )));
+        assert!(set.contains(&Move::Basic {
+            origin: Coord::try_from("e5").unwrap(),
+            destination: Coord::try_from("e6").unwrap()
+        }));
         assert!(set.contains(&Move::EnPassant(Coord::try_from("e5").unwrap())));
     }
 }
