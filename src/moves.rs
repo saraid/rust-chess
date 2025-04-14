@@ -14,11 +14,26 @@ pub mod rook;
 
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub enum Move {
-    Basic { origin: Coord, destination: Coord },
-    Capture { origin: Coord, destination: Coord },
-    DoubleAdvance(/* destination */ Coord, /* en passant */ Coord),
-    EnPassant(/* origin */ Coord),
-    Promotion(/* origin */ Coord, /* destination */ Coord, Piece),
+    Basic {
+        origin: Coord,
+        destination: Coord,
+    },
+    Capture {
+        origin: Coord,
+        destination: Coord,
+    },
+    DoubleAdvance {
+        destination: Coord,
+        en_passant_target: Coord,
+    },
+    EnPassant {
+        origin: Coord,
+    },
+    Promotion {
+        origin: Coord,
+        destination: Coord,
+        target_rank: Piece,
+    },
     KingsideCastle,
     QueensideCastle,
 }
@@ -73,7 +88,10 @@ pub fn process_candidates_arbitrarily(
         match board.piece_at(&candidate) {
             Some(p) if p.side() != side => {
                 println!("Capture {}", candidate);
-                moves.insert(Move::Capture { origin: origin.clone(), destination: candidate });
+                moves.insert(Move::Capture {
+                    origin: origin.clone(),
+                    destination: candidate,
+                });
             }
             Some(_) => {}
             None => {
@@ -98,7 +116,10 @@ pub fn process_candidates_in_line(
         match piece_at_candidate {
             Some(p) if p.side() != side => {
                 println!("Capture {}", candidate);
-                moves.insert(Move::Capture { origin: origin.clone(), destination: candidate });
+                moves.insert(Move::Capture {
+                    origin: origin.clone(),
+                    destination: candidate,
+                });
                 return;
             }
             Some(_) => {
@@ -209,6 +230,9 @@ mod tests {
         let mut moves = HashSet::<Move>::new();
         process_candidates_arbitrarily(&board, &origin, candidates.clone(), &side, &mut moves);
 
-        assert!(moves.contains(&Move::Capture { origin, destination: candidates[0].clone() }));
+        assert!(moves.contains(&Move::Capture {
+            origin,
+            destination: candidates[0].clone()
+        }));
     }
 }

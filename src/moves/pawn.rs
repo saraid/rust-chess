@@ -35,7 +35,10 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
         if game.board.piece_at(&en_passant_target).is_none()
             && game.board.piece_at(&candidate).is_none()
         {
-            moves.insert(Move::DoubleAdvance(candidate, en_passant_target));
+            moves.insert(Move::DoubleAdvance {
+                destination: candidate,
+                en_passant_target,
+            });
         }
     }
 
@@ -44,13 +47,18 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
         Some(candidate) => {
             match &game.en_passant_target {
                 Some(_target) => {
-                    moves.insert(Move::EnPassant(coord.clone()));
+                    moves.insert(Move::EnPassant {
+                        origin: coord.clone(),
+                    });
                 }
                 None => {}
             }
             match game.board.piece_at(&candidate).filter(|p| p.side() != side) {
                 Some(_) => {
-                    moves.insert(Move::Capture { origin: coord.clone(), destination: candidate });
+                    moves.insert(Move::Capture {
+                        origin: coord.clone(),
+                        destination: candidate,
+                    });
                 }
                 None => {}
             }
@@ -61,13 +69,18 @@ pub fn move_set(game: &Game, coord: &Coord, side: &Side) -> HashSet<Move> {
         Some(candidate) => {
             match &game.en_passant_target {
                 Some(_target) => {
-                    moves.insert(Move::EnPassant(coord.clone()));
+                    moves.insert(Move::EnPassant {
+                        origin: coord.clone(),
+                    });
                 }
                 None => {}
             }
             match game.board.piece_at(&candidate).filter(|p| p.side() != side) {
                 Some(_) => {
-                    moves.insert(Move::Capture { origin: coord.clone(), destination: candidate });
+                    moves.insert(Move::Capture {
+                        origin: coord.clone(),
+                        destination: candidate,
+                    });
                 }
                 None => {}
             }
@@ -91,10 +104,10 @@ mod tests {
             origin: Coord::try_from("e2").unwrap(),
             destination: Coord::try_from("e3").unwrap()
         }));
-        assert!(set.contains(&Move::DoubleAdvance(
-            Coord::try_from("e4").unwrap(),
-            Coord::try_from("e3").unwrap(),
-        )));
+        assert!(set.contains(&Move::DoubleAdvance {
+            destination: Coord::try_from("e4").unwrap(),
+            en_passant_target: Coord::try_from("e3").unwrap(),
+        }));
     }
 
     #[test]
@@ -107,6 +120,8 @@ mod tests {
             origin: Coord::try_from("e5").unwrap(),
             destination: Coord::try_from("e6").unwrap()
         }));
-        assert!(set.contains(&Move::EnPassant(Coord::try_from("e5").unwrap())));
+        assert!(set.contains(&Move::EnPassant {
+            origin: Coord::try_from("e5").unwrap()
+        }));
     }
 }

@@ -123,7 +123,10 @@ impl Game {
             .flat_map(|coord| Game::move_set(&game, &coord))
         {
             match enemy_move {
-                Move::Capture { destination, origin: _ } => {
+                Move::Capture {
+                    destination,
+                    origin: _,
+                } => {
                     if let Some(Piece::King(side)) = game.board.piece_at(&destination) {
                         if side == game.active_color {
                             return true;
